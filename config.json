@@ -1,0 +1,72 @@
+{
+  "prefix": "w.",
+  "currency": {
+    "name": "WonderCash",
+    "symbol": "💰",
+    "dailyAmount": 100,
+    "workAmount": 50
+  },
+  "booster": {
+    "dailyBonus": 50,
+    "workBonus": 25,
+    "exclusiveChannels": true
+  },
+  "premium": {
+    "dailyBonus": 100,
+    "workBonus": 50,
+    "exclusiveChannels": true,
+    "customColor": true
+  },
+  "games": {
+    "coinflip": {
+      "minBet": 10,
+      "maxBet": 1000
+    },
+    "dice": {
+      "minBet": 10,
+      "maxBet": 500
+    },
+    "slots": {
+      "minBet": 20,
+      "maxBet": 200
+    }
+  },
+  "colors": {
+    "primary": "#7C3AED",
+    "success": "#10B981",
+    "error": "#EF4444",
+    "warning": "#F59E0B",
+    "info": "#3B82F6"
+  },
+  "cooldowns": {
+    "daily": 1440,
+    "work": 60,
+    "coinflip": 2,
+    "dice": 3,
+    "slots": 5,
+    "mystery_box": 30,
+    "use_item": 1
+  },
+  "shop": {
+    "categories": ["consumables", "collectibles", "profile", "special"],
+    "dailyFeatured": true,
+    "discounts": {
+      "booster": 0.1,
+      "premium": 0.15
+    }
+  },
+  "giveaways": {
+    "maxDuration": 10080,
+    "maxWinners": 10,
+    "winnerCooldown": 10080,
+    "odds": {
+      "regular": 1.0,
+      "booster": 2.0,
+      "premium": 3.0
+    },
+    "restrictions": {
+      "premiumBypass": true,
+      "accountAgeMin": 7
+    }
+  }
+}
