@@ -302,6 +302,62 @@ const commands = [
                             { name: 'Voice', value: 'voice' },
                             { name: 'Role', value: 'role' },
                             { name: 'Overall', value: 'overall' }
+                        ))),
+
+    new SlashCommandBuilder()
+        .setName('drops')
+        .setDescription('WonderCoins drop system management and stats')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('setup')
+                .setDescription('Setup drop channels (Admin only)')
+                .addChannelOption(option =>
+                    option.setName('channel')
+                        .setDescription('Channel for WonderCoins drops')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('remove')
+                .setDescription('Remove drop channel (Admin only)')
+                .addChannelOption(option =>
+                    option.setName('channel')
+                        .setDescription('Channel to remove from drops')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List configured drop channels'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('stats')
+                .setDescription('View drop statistics'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('mystats')
+                .setDescription('View your personal drop statistics'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('trigger')
+                .setDescription('Manually trigger a drop (Admin only)')
+                .addChannelOption(option =>
+                    option.setName('channel')
+                        .setDescription('Channel to drop coins in')
+                        .setRequired(true))
+                .addIntegerOption(option =>
+                    option.setName('amount')
+                        .setDescription('Amount of coins (optional)')
+                        .setRequired(false)
+                        .setMinValue(10)
+                        .setMaxValue(5000))
+                .addStringOption(option =>
+                    option.setName('rarity')
+                        .setDescription('Drop rarity (optional)')
+                        .setRequired(false)
+                        .addChoices(
+                            { name: 'Common', value: 'common' },
+                            { name: 'Rare', value: 'rare' },
+                            { name: 'Epic', value: 'epic' },
+                            { name: 'Legendary', value: 'legendary' }
                         )))
 ];
 
