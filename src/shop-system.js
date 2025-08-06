@@ -217,6 +217,35 @@ class ShopSystem {
                     levelRequirement: {
                         overall: 50
                     }
+                },
+                {
+                    id: 'ultimate_booster',
+                    name: '🌟 Ultimate XP Booster',
+                    description: 'Quintuple XP gain for 3 hours (Max level exclusive)',
+                    price: 50000,
+                    type: 'consumable',
+                    category: 'special',
+                    effect: 'ultimate_xp_boost',
+                    duration: 180,
+                    emoji: '🌟',
+                    levelRequirement: {
+                        overall: 45
+                    }
+                },
+                {
+                    id: 'master_title',
+                    name: '👑 Master Title',
+                    description: 'Exclusive title for reaching level 40+ in all categories',
+                    price: 75000,
+                    type: 'collectible',
+                    category: 'special',
+                    effect: 'master_title',
+                    emoji: '👑',
+                    levelRequirement: {
+                        text: 40,
+                        voice: 40,
+                        role: 40
+                    }
                 }
             ]
         };

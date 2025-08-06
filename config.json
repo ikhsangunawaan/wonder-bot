@@ -71,6 +71,7 @@
   },
   "leveling": {
     "enabled": true,
+    "maxLevel": 50,
     "xp": {
       "text": {
         "base": 15,
@@ -86,6 +87,7 @@
         "base": 10,
         "bonus": 5,
         "minDuration": 60000,
+        "requiresUnmuted": true,
         "multipliers": {
           "booster": 1.5,
           "premium": 1.75

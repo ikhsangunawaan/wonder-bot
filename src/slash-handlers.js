@@ -410,7 +410,7 @@ class SlashHandlers {
                 },
                 {
                     name: '🏆 Leveling System',
-                    value: '**Text Level:** Gain XP by chatting (15-25 XP per message)\n**Voice Level:** Gain XP in voice channels (10-15 XP per minute)\n**Role Level:** Gain XP through daily activities and achievements\n**Overall Level:** Combined progress from all categories',
+                    value: '**Text Level:** Gain XP by chatting (15-25 XP per message)\n**Voice Level:** Gain XP in voice channels (10-15 XP per minute, only when unmuted)\n**Role Level:** Gain XP through daily activities and achievements\n**Overall Level:** Combined progress from all categories\n\n**🏆 MAX LEVEL: 50 for all categories!**',
                     inline: false
                 }
             )

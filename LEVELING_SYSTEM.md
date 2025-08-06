@@ -2,6 +2,9 @@
 
 The Wonder Bot now features a comprehensive multi-tiered leveling system that rewards user activity across different categories!
 
+## 🚨 IMPORTANT: Level Cap
+**All level types are capped at Level 50!** Once you reach the maximum level, you become a true server legend! 🏆
+
 ## 📊 Level Types
 
 ### 💬 Text Level
@@ -9,12 +12,15 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
 - **XP per message:** 15-25 XP (based on message length)
 - **Cooldown:** 1 minute between XP gains
 - **Bonuses:** Longer messages (>50 characters) give bonus XP
+- **Max Level:** 50
 
 ### 🎤 Voice Level  
 - **How to earn:** Spend time in voice channels
 - **XP per minute:** 10-15 XP (15 XP when with others)
 - **Minimum duration:** 1 minute to earn XP
 - **Bonuses:** Being in voice with other members gives extra XP
+- **⚠️ IMPORTANT:** You must be unmuted (both server and self) to earn voice XP!
+- **Max Level:** 50
 
 ### ⭐ Role Level
 - **How to earn:** Complete daily activities and achievements
@@ -25,12 +31,14 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
   - Voice streaks: 30 XP
   - Helping others: 100 XP
   - Event participation: 200 XP
+- **Max Level:** 50
 
 ### 🏆 Overall Level
 - **Combined XP:** Sum of all Text, Voice, and Role XP
 - **Master progression:** Represents your overall server engagement
+- **Max Level:** 50
 
-## 🎁 Level Rewards
+## 🎁 Level Rewards (Updated for Level 50 Cap)
 
 ### Text Level Rewards
 - **Level 5:** 500 💰 WonderCash
@@ -39,6 +47,10 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
 - **Level 20:** 2,000 💰 WonderCash
 - **Level 25:** Text Master title
 - **Level 30:** 5,000 💰 WonderCash
+- **Level 35:** 7,500 💰 WonderCash
+- **Level 40:** 10,000 💰 WonderCash
+- **Level 45:** 15,000 💰 WonderCash
+- **Level 50:** 🏆 25,000 💰 WonderCash - MAX LEVEL ACHIEVED!
 
 ### Voice Level Rewards
 - **Level 5:** 750 💰 WonderCash
@@ -47,6 +59,10 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
 - **Level 20:** 3,000 💰 WonderCash
 - **Level 25:** Voice Champion title
 - **Level 30:** 7,500 💰 WonderCash
+- **Level 35:** 10,000 💰 WonderCash
+- **Level 40:** 15,000 💰 WonderCash
+- **Level 45:** 20,000 💰 WonderCash
+- **Level 50:** 🏆 35,000 💰 WonderCash - MAX LEVEL ACHIEVED!
 
 ### Role Level Rewards
 - **Level 5:** 1,000 💰 WonderCash
@@ -55,44 +71,29 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
 - **Level 20:** 5,000 💰 WonderCash
 - **Level 25:** Community Leader title
 - **Level 30:** 10,000 💰 WonderCash
+- **Level 35:** 15,000 💰 WonderCash
+- **Level 40:** 20,000 💰 WonderCash
+- **Level 45:** 30,000 💰 WonderCash
+- **Level 50:** 🏆 50,000 💰 WonderCash - MAX LEVEL ACHIEVED!
 
 ### Overall Level Rewards
 - **Level 10:** 2,000 💰 WonderCash
 - **Level 25:** Veteran role
-- **Level 50:** 10,000 💰 WonderCash
-- **Level 75:** Server Legend title
-- **Level 100:** 50,000 💰 WonderCash
+- **Level 30:** 10,000 💰 WonderCash
+- **Level 35:** 15,000 💰 WonderCash
+- **Level 40:** 25,000 💰 WonderCash
+- **Level 45:** Server Grandmaster title
+- **Level 50:** 🏆 100,000 💰 WonderCash - ULTIMATE LEGEND STATUS!
 
-## 💎 XP Multipliers
+## 🎤 Voice XP Mute Detection
 
-### Server Boosters
-- **1.5x XP** for all activities
-- Stacks with other bonuses
+The system automatically checks your mute status every minute:
+- **Server Mute:** No XP awarded when server-muted
+- **Self Mute:** No XP awarded when self-muted
+- **Unmuted:** Normal XP gains (10-15 XP per minute)
+- **Status Changes:** If you become muted during a session, XP stops until you unmute
 
-### Premium Members
-- **1.75x XP** for all activities
-- Stacks with other bonuses
-
-## 🎮 Commands
-
-### User Commands
-- `/level` - Check your levels and XP progress
-- `/level @user` - Check someone else's levels
-- `/rank` - View leaderboards by category
-- `/rank overall` - Overall leaderboard
-- `/rank text` - Text level leaderboard
-- `/rank voice` - Voice level leaderboard
-- `/rank role` - Role level leaderboard
-- `/rewards` - View and claim unclaimed level rewards
-
-### Admin Commands
-- `/give-xp @user text 100` - Give XP to a user
-- `/reset-level @user` - Reset user's levels
-- `/reset-level @user text` - Reset specific level type
-
-## 🛍️ Shop Integration
-
-The leveling system integrates with the Wonder Shop! New level-restricted items include:
+## 🛍️ New Shop Items (Level 50 Cap Edition)
 
 ### Level-Restricted Items
 - **⚡ XP Booster** (Overall Level 5): Double XP for 1 hour
@@ -100,72 +101,46 @@ The leveling system integrates with the Wonder Shop! New level-restricted items 
 - **🎤 Voice Magnet** (Voice Level 10): Extra voice XP when others join
 - **💬 Chat Streak** (Text Level 8): No text XP cooldown for 30 minutes
 - **🏆 Legend Badge** (Overall Level 50): Exclusive legend badge
+- **🌟 Ultimate XP Booster** (Overall Level 45): Quintuple XP for 3 hours
+- **👑 Master Title** (Text/Voice/Role Level 40): Master title for dedicated players
 
 ## 📈 Level Formula
 
 The XP required for each level follows the formula:
 ```
 XP Needed = 100 × Level^1.5
+Level Cap = 50 (Maximum)
 ```
 
 Examples:
 - Level 1 → 2: 100 XP
-- Level 5 → 6: 1,118 XP  
 - Level 10 → 11: 3,162 XP
-- Level 20 → 21: 8,944 XP
+- Level 25 → 26: 15,625 XP
+- Level 40 → 41: 25,298 XP
+- Level 49 → 50: 34,300 XP (Final level!)
 
-## 🔧 Configuration
+## 🏆 Reaching Max Level
 
-Leveling settings can be configured in `config.json`:
+When you reach Level 50 in any category:
+- 🎉 Special gold-colored level up announcement
+- 🏆 "MAX LEVEL ACHIEVED" notification
+- 💰 Massive currency reward
+- 🌟 Server legend status
+- 🔒 Access to exclusive max-level shop items
 
-```json
-{
-  "leveling": {
-    "enabled": true,
-    "xp": {
-      "text": {
-        "base": 15,
-        "bonus": 5,
-        "cooldown": 60000,
-        "multipliers": {
-          "booster": 1.5,
-          "premium": 1.75
-        }
-      }
-    }
-  }
-}
-```
+## 🎯 Tips for Reaching Max Level
 
-## 📊 Database Structure
+1. **Stay consistently active** - Regular participation is key
+2. **Keep voice unmuted** - Muted time doesn't count for voice XP
+3. **Complete daily activities** - Role XP adds up quickly
+4. **Use XP boosters wisely** - Save them for grinding sessions
+5. **Participate in events** - Maximum role XP opportunities
 
-The system uses several new database tables:
-- `user_levels` - Stores XP and level data for each user
-- `level_rewards` - Tracks level rewards and claim status
-- `voice_sessions` - Records voice activity sessions
+## ⚠️ Important Notes
 
-## 🚀 Features
+- **Voice Mute Check:** You must be unmuted to earn voice XP
+- **Level Cap:** All levels stop at 50 - no further progression
+- **Max Level Benefits:** Exclusive shop access and legend status
+- **Automatic Detection:** System checks mute status every minute
 
-- **Real-time level ups** - Instant notifications when you level up
-- **Automatic reward claiming** - Rewards are auto-claimed when viewing
-- **Voice session tracking** - Accurate voice time and XP tracking
-- **Comprehensive leaderboards** - Multiple ranking categories
-- **Role integration** - Automatic role assignment for level rewards
-- **Shop integration** - Level requirements for special items
-
-## 🎯 Tips for Leveling
-
-1. **Stay active in chat** - Regular messages give steady text XP
-2. **Join voice channels** - Voice XP accumulates over time
-3. **Complete daily activities** - Don't miss your daily rewards
-4. **Boost the server** - Get 1.5x XP multiplier on everything
-5. **Purchase XP boosters** - Speed up progression with shop items
-
-## 🔄 Migration
-
-Existing users will automatically get leveling records created when they:
-- Send their first message after the update
-- Join a voice channel
-- Use any bot command
-
-Start your leveling journey today and climb the ranks to become a server legend! 🏆
+Start your journey to become a Level 50 legend today! 🏆
