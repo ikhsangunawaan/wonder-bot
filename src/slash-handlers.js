@@ -317,6 +317,7 @@ class SlashHandlers {
                 {
                     name: `${this.design.theme.emojis.treasure} Economy Commands`,
                     value: '`/balance` - Check WonderCoins treasury\n`/daily` - Claim royal daily reward\n`/work` - Work for the kingdom\n`/leaderboard` - View top earners',
+cursor/tambahkan-fitur-leveling-roles-dan-level-d928
                     inline: false
                 },
                 {
@@ -345,6 +346,36 @@ class SlashHandlers {
                     inline: false
                 },
                 {
+
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.diamond} Game Commands`,
+                    value: '`/coinflip` - Royal coin flip game\n`/dice` - Royal dice rolling\n`/slots` - Palace slot machine',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.royal} Introduction Commands`,
+                    value: '`/intro create` - Create royal introduction card\n`/intro view` - View noble profiles',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.crown} Leveling Commands`,
+                    value: '`/level` - Check your royal levels and XP\n`/rank` - View nobility leaderboards\n`/rewards` - Claim level rewards\n`/give-xp` - Give XP (Admin)\n`/reset-level` - Reset levels (Admin)',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.star} Giveaway Commands`,
+                    value: '`/giveaway start` - Start royal giveaway (Admin)\n`/giveaway list` - List active giveaways\n`/giveaway wins` - View your victories',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.scepter} Admin Commands`,
+                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel\n`/level-role set` - Set role rewards for levels\n`/level-role remove` - Remove role rewards\n`/level-role list` - List all role rewards',
+                    inline: false
+                },
+                {
+ main
                     name: `${this.design.theme.emojis.magic} Exclusive Perks`,
                     value: '**Server Boosters:** +50 daily, +25 work bonus, **1.5x XP**, **2x giveaway odds**\n**Premium Members:** +100 daily, +50 work bonus, **1.75x XP**, **3x giveaway odds**, **bypass winner restrictions**',
                     inline: false
@@ -360,6 +391,301 @@ class SlashHandlers {
 
         await interaction.reply({ embeds: [embed] });
     }
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
+
+    async handleDrops(interaction) {
+        const subcommand = interaction.options.getSubcommand();
+        
+        switch (subcommand) {
+            case 'setup':
+                return await this.handleDropSetup(interaction);
+            case 'remove':
+                return await this.handleDropRemove(interaction);
+            case 'list':
+                return await this.handleDropList(interaction);
+            case 'stats':
+                return await this.handleDropStats(interaction);
+            case 'mystats':
+                return await this.handleDropMyStats(interaction);
+            case 'trigger':
+                return await this.handleDropTrigger(interaction);
+            default:
+                return await interaction.reply({ content: '❌ Unknown subcommand!', ephemeral: true });
+        }
+    }
+
+    async handleDropSetup(interaction) {
+        // Check admin permissions
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return await interaction.reply({
+                content: '❌ You need Administrator permissions to use this command!',
+                ephemeral: true
+            });
+        }
+
+        const channel = interaction.options.getChannel('channel');
+        const bot = interaction.client.bot || interaction.client;
+
+        if (!bot.dropSystem) {
+            return await interaction.reply({
+                content: '❌ Drop system is not initialized!',
+                ephemeral: true
+            });
+        }
+
+        const success = await bot.dropSystem.addDropChannel(interaction.guild.id, channel.id, interaction.user.id);
+
+        if (success) {
+            const embed = new EmbedBuilder()
+                .setColor('#2ecc71')
+                .setTitle('✅ Drop Channel Added!')
+                .setDescription(`🎯 ${channel} has been added to the WonderCoins drop system!\n\n💰 Random drops will now appear in this channel between 30 minutes to 3 hours.\n🎲 Drop amounts: 10-500 WonderCoins\n🏆 Rare drops possible with multipliers!`)
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.reply({
+                content: '❌ Failed to add drop channel. It may already be configured.',
+                ephemeral: true
+            });
+        }
+    }
+
+    async handleDropRemove(interaction) {
+        // Check admin permissions
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return await interaction.reply({
+                content: '❌ You need Administrator permissions to use this command!',
+                ephemeral: true
+            });
+        }
+
+        const channel = interaction.options.getChannel('channel');
+        const bot = interaction.client.bot || interaction.client;
+
+        if (!bot.dropSystem) {
+            return await interaction.reply({
+                content: '❌ Drop system is not initialized!',
+                ephemeral: true
+            });
+        }
+
+        const success = await bot.dropSystem.removeDropChannel(interaction.guild.id, channel.id);
+
+        if (success) {
+            const embed = new EmbedBuilder()
+                .setColor('#e74c3c')
+                .setTitle('🗑️ Drop Channel Removed!')
+                .setDescription(`${channel} has been removed from the WonderCoins drop system.`)
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.reply({
+                content: '❌ Failed to remove drop channel.',
+                ephemeral: true
+            });
+        }
+    }
+
+    async handleDropList(interaction) {
+        const bot = interaction.client.bot || interaction.client;
+
+        if (!bot.dropSystem) {
+            return await interaction.reply({
+                content: '❌ Drop system is not initialized!',
+                ephemeral: true
+            });
+        }
+
+        const channels = await bot.dropSystem.getDropChannels(interaction.guild.id);
+
+        if (channels.length === 0) {
+            return await interaction.reply({
+                content: '📭 No drop channels are currently configured.\nUse `/drops setup` to add channels!',
+                ephemeral: true
+            });
+        }
+
+        const channelList = channels.map(ch => {
+            const channel = interaction.guild.channels.cache.get(ch);
+            return channel ? `• ${channel}` : `• #deleted-channel (${ch})`;
+        }).join('\n');
+
+        const embed = new EmbedBuilder()
+            .setColor('#3498db')
+            .setTitle('📋 Configured Drop Channels')
+            .setDescription(`💰 **WonderCoins drops are active in:**\n\n${channelList}\n\n⏰ **Drop Timing:** Every 30 minutes to 3 hours\n💎 **Amount Range:** 10-500 WonderCoins\n🎰 **Special Rarities:** Rare, Epic, Legendary drops possible!`)
+            .setTimestamp();
+
+        await interaction.reply({ embeds: [embed] });
+    }
+
+    async handleDropStats(interaction) {
+        const bot = interaction.client.bot || interaction.client;
+
+        if (!bot.dropSystem) {
+            return await interaction.reply({
+                content: '❌ Drop system is not initialized!',
+                ephemeral: true
+            });
+        }
+
+        try {
+            const stats = await bot.dropSystem.getDropStats(interaction.guild.id);
+            const topCollectors = await database.getTopDropCollectors(interaction.guild.id, 5);
+
+            if (!stats || stats.length === 0) {
+                return await interaction.reply({
+                    content: '📊 No drop statistics available yet. Wait for some drops to occur!',
+                    ephemeral: true
+                });
+            }
+
+            const allStats = stats.find(s => s.rarity === 'ALL');
+            const rarityStats = stats.filter(s => s.rarity !== 'ALL');
+
+            let rarityBreakdown = '```\n';
+            rarityStats.forEach(stat => {
+                rarityBreakdown += `${stat.rarity.toUpperCase().padEnd(10)} ${stat.rarity_count.toString().padStart(4)} drops\n`;
+            });
+            rarityBreakdown += '```';
+
+            let topCollectorsList = '';
+            if (topCollectors.length > 0) {
+                topCollectors.forEach((collector, index) => {
+                    const user = interaction.guild.members.cache.get(collector.user_id);
+                    const username = user ? user.displayName : 'Unknown User';
+                    topCollectorsList += `${index + 1}. **${username}** - ${collector.total_collected} coins (${collector.total_drops} drops)\n`;
+                });
+            } else {
+                topCollectorsList = 'No collectors yet!';
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor('#f39c12')
+                .setTitle('📊 WonderCoins Drop Statistics')
+                .addFields([
+                    {
+                        name: '🎯 Overall Stats',
+                        value: `**Total Drops:** ${allStats?.total_drops || 0}\n**Total Coins:** ${allStats?.total_amount || 0}\n**Average Drop:** ${Math.round(allStats?.avg_amount || 0)} coins\n**Unique Collectors:** ${allStats?.unique_collectors || 0}`,
+                        inline: true
+                    },
+                    {
+                        name: '🎭 Rarity Breakdown',
+                        value: rarityBreakdown,
+                        inline: true
+                    },
+                    {
+                        name: '🏆 Top Collectors',
+                        value: topCollectorsList,
+                        inline: false
+                    }
+                ])
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error getting drop stats:', error);
+            await interaction.reply({
+                content: '❌ Error retrieving drop statistics.',
+                ephemeral: true
+            });
+        }
+    }
+
+    async handleDropMyStats(interaction) {
+        try {
+            const userStats = await database.getUserDropStats(interaction.user.id);
+
+            if (!userStats) {
+                return await interaction.reply({
+                    content: '📊 You haven\'t collected any drops yet! Wait for a drop to appear and click the buttons to collect WonderCoins!',
+                    ephemeral: true
+                });
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor('#9b59b6')
+                .setTitle('💎 Your Drop Statistics')
+                .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
+                .addFields([
+                    {
+                        name: '💰 Collection Summary',
+                        value: `**Total Collected:** ${userStats.total_collected} WonderCoins\n**Total Drops:** ${userStats.total_drops}\n**Best Single Drop:** ${userStats.best_drop} coins`,
+                        inline: true
+                    },
+                    {
+                        name: '🎭 Rarity Collection',
+                        value: `**Common:** ${userStats.common_drops || 0}\n**Rare:** ${userStats.rare_drops || 0}\n**Epic:** ${userStats.epic_drops || 0}\n**Legendary:** ${userStats.legendary_drops || 0}`,
+                        inline: true
+                    },
+                    {
+                        name: '📈 Performance',
+                        value: `**Average per Drop:** ${Math.round(userStats.total_collected / userStats.total_drops)} coins\n**Last Drop:** ${userStats.last_drop ? new Date(userStats.last_drop).toLocaleString() : 'Never'}`,
+                        inline: false
+                    }
+                ])
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        } catch (error) {
+            console.error('Error getting user drop stats:', error);
+            await interaction.reply({
+                content: '❌ Error retrieving your drop statistics.',
+                ephemeral: true
+            });
+        }
+    }
+
+    async handleDropTrigger(interaction) {
+        // Check admin permissions
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return await interaction.reply({
+                content: '❌ You need Administrator permissions to use this command!',
+                ephemeral: true
+            });
+        }
+
+        const channel = interaction.options.getChannel('channel');
+        const amount = interaction.options.getInteger('amount');
+        const rarity = interaction.options.getString('rarity');
+        const bot = interaction.client.bot || interaction.client;
+
+        if (!bot.dropSystem) {
+            return await interaction.reply({
+                content: '❌ Drop system is not initialized!',
+                ephemeral: true
+            });
+        }
+
+        try {
+            const success = await bot.dropSystem.triggerManualDrop(channel.id, amount, rarity);
+
+            if (success) {
+                const embed = new EmbedBuilder()
+                    .setColor('#2ecc71')
+                    .setTitle('🎯 Manual Drop Triggered!')
+                    .setDescription(`💰 A drop has been triggered in ${channel}!\n\n${amount ? `**Amount:** ${amount} coins\n` : ''}${rarity ? `**Rarity:** ${rarity.toUpperCase()}\n` : ''}⏰ Users have 60 seconds to collect!`)
+                    .setTimestamp();
+
+                await interaction.reply({ embeds: [embed] });
+            } else {
+                await interaction.reply({
+                    content: '❌ Failed to trigger drop. Check if the channel exists.',
+                    ephemeral: true
+                });
+            }
+        } catch (error) {
+            console.error('Error triggering manual drop:', error);
+            await interaction.reply({
+                content: '❌ Error triggering drop.',
+                ephemeral: true
+            });
+        }
+    }
+
+main
 }
 
 module.exports = SlashHandlers;

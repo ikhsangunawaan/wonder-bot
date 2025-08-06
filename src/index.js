@@ -11,6 +11,10 @@ const ShopSystem = require('./shop-system');
 const CooldownManager = require('./cooldown-manager');
 const GiveawaySystem = require('./giveaway-system');
 const LevelingSystem = require('./leveling-system');
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
+const WonderCoinsDropSystem = require('./wondercoins-drop-system');
+
+ main
 
 // Load environment variables
 require('dotenv').config();
@@ -36,6 +40,10 @@ class WonderBot {
         this.cooldownManager = new CooldownManager();
         this.giveawaySystem = new GiveawaySystem(this.client);
         this.levelingSystem = new LevelingSystem(this.client);
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
+        this.dropSystem = new WonderCoinsDropSystem(this.client);
+
+ main
         
         this.setupEventHandlers();
         this.loadCommands();
@@ -46,6 +54,12 @@ class WonderBot {
         this.client.once(Events.ClientReady, async () => {
             console.log(`✅ Luxury Kingdom Bot is ready! Logged in as ${this.client.user.tag}`);
             this.client.user.setActivity('w.help | Luxury Kingdom 🏰 WonderCoins 💰', { type: 'WATCHING' });
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
+            
+            // Initialize drop system reference
+            this.client.bot = this;
+
+ main
             
             // Deploy slash commands
             await deployCommands();
@@ -167,6 +181,12 @@ class WonderBot {
                     case 'level-role':
                         await this.slashHandlers.handleLevelRole(interaction);
                         break;
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
+                    case 'drops':
+                        await this.slashHandlers.handleDrops(interaction);
+                        break;
+
+ main
                 }
             } catch (error) {
                 console.error('Error executing slash command:', error);
@@ -211,6 +231,11 @@ class WonderBot {
                 break;
             case 'slots':
                 await this.handleSlotsGame(interaction, parseInt(params[0]));
+                break;
+            case 'collect':
+            case 'quick':
+            case 'lucky':
+                await this.dropSystem.handleDropCollection(interaction);
                 break;
         }
     }

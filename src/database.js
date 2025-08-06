@@ -210,6 +210,49 @@ class Database {
                 UNIQUE(level_type, level)
             )
         `);
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
+
+        // WonderCoins drop channels table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS drop_channels (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                channel_id TEXT,
+                created_by TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(guild_id, channel_id)
+            )
+        `);
+
+        // WonderCoins drop statistics table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS drop_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                amount INTEGER,
+                rarity TEXT,
+                collection_type TEXT,
+                drop_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // User drop statistics summary table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS user_drop_stats (
+                user_id TEXT PRIMARY KEY,
+                total_collected INTEGER DEFAULT 0,
+                total_drops INTEGER DEFAULT 0,
+                common_drops INTEGER DEFAULT 0,
+                rare_drops INTEGER DEFAULT 0,
+                epic_drops INTEGER DEFAULT 0,
+                legendary_drops INTEGER DEFAULT 0,
+                last_drop DATETIME,
+                best_drop INTEGER DEFAULT 0
+            )
+        `);
+
+ main
     }
 
     // User economy methods
@@ -1136,6 +1179,172 @@ class Database {
                 }
                 resolve(rows);
             });
+        });
+    }
+
+    // WonderCoins Drop System Methods
+    async addDropChannel(guildId, channelId, createdBy = null) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT OR IGNORE INTO drop_channels (guild_id, channel_id, created_by) VALUES (?, ?, ?)',
+                [guildId, channelId, createdBy],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    async removeDropChannel(guildId, channelId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'DELETE FROM drop_channels WHERE guild_id = ? AND channel_id = ?',
+                [guildId, channelId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    async getDropChannels(guildId = null) {
+        return new Promise((resolve, reject) => {
+            let query = 'SELECT * FROM drop_channels';
+            let params = [];
+            
+            if (guildId) {
+                query += ' WHERE guild_id = ?';
+                params = [guildId];
+            }
+            
+            this.db.all(query, params, (err, rows) => {
+                if (err) reject(err);
+                resolve(rows || []);
+            });
+        });
+    }
+
+    async addDropStat(guildId, userId, amount, rarity, collectionType) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT INTO drop_stats (guild_id, user_id, amount, rarity, collection_type) VALUES (?, ?, ?, ?, ?)',
+                [guildId, userId, amount, rarity, collectionType],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    async updateUserDropStats(userId, amount, rarity) {
+        return new Promise((resolve, reject) => {
+            // First check if user exists in drop stats
+            this.db.get('SELECT * FROM user_drop_stats WHERE user_id = ?', [userId], (err, row) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                const rarityField = `${rarity}_drops`;
+                const now = new Date().toISOString();
+
+                if (row) {
+                    // Update existing record
+                    const newTotal = row.total_collected + amount;
+                    const newDrops = row.total_drops + 1;
+                    const newRarityCount = row[rarityField] + 1;
+                    const newBest = Math.max(row.best_drop, amount);
+
+                    this.db.run(`
+                        UPDATE user_drop_stats 
+                        SET total_collected = ?, total_drops = ?, ${rarityField} = ?, last_drop = ?, best_drop = ?
+                        WHERE user_id = ?`,
+                        [newTotal, newDrops, newRarityCount, now, newBest, userId],
+                        function(err) {
+                            if (err) reject(err);
+                            resolve(this.changes);
+                        }
+                    );
+                } else {
+                    // Create new record
+                    this.db.run(`
+                        INSERT INTO user_drop_stats 
+                        (user_id, total_collected, total_drops, ${rarityField}, last_drop, best_drop)
+                        VALUES (?, ?, 1, 1, ?, ?)`,
+                        [userId, amount, now, amount],
+                        function(err) {
+                            if (err) reject(err);
+                            resolve(this.lastID);
+                        }
+                    );
+                }
+            });
+        });
+    }
+
+    async getUserDropStats(userId) {
+        return new Promise((resolve, reject) => {
+            this.db.get('SELECT * FROM user_drop_stats WHERE user_id = ?', [userId], (err, row) => {
+                if (err) reject(err);
+                resolve(row);
+            });
+        });
+    }
+
+    async getDropStats(guildId) {
+        return new Promise((resolve, reject) => {
+            this.db.all(`
+                SELECT 
+                    COUNT(*) as total_drops,
+                    SUM(amount) as total_amount,
+                    AVG(amount) as avg_amount,
+                    COUNT(DISTINCT user_id) as unique_collectors,
+                    rarity,
+                    COUNT(*) as rarity_count
+                FROM drop_stats 
+                WHERE guild_id = ? 
+                GROUP BY rarity
+                UNION ALL
+                SELECT 
+                    COUNT(*) as total_drops,
+                    SUM(amount) as total_amount,
+                    AVG(amount) as avg_amount,
+                    COUNT(DISTINCT user_id) as unique_collectors,
+                    'ALL' as rarity,
+                    COUNT(*) as rarity_count
+                FROM drop_stats 
+                WHERE guild_id = ?`,
+                [guildId, guildId],
+                (err, rows) => {
+                    if (err) reject(err);
+                    resolve(rows || []);
+                }
+            );
+        });
+    }
+
+    async getTopDropCollectors(guildId, limit = 10) {
+        return new Promise((resolve, reject) => {
+            this.db.all(`
+                SELECT 
+                    user_id,
+                    SUM(amount) as total_collected,
+                    COUNT(*) as total_drops,
+                    MAX(amount) as best_drop
+                FROM drop_stats 
+                WHERE guild_id = ? 
+                GROUP BY user_id 
+                ORDER BY total_collected DESC 
+                LIMIT ?`,
+                [guildId, limit],
+                (err, rows) => {
+                    if (err) reject(err);
+                    resolve(rows || []);
+                }
+            );
         });
     }
 }
