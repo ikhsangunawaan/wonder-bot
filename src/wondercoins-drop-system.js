@@ -7,7 +7,7 @@ class WonderCoinsDropSystem {
         this.client = client;
         this.activeDrops = new Collection(); // channelId -> dropData
         this.dropChannels = new Collection(); // guildId -> [channelIds]
-        this.dropIntervals = new Collection(); // guildId -> intervalId
+        this.globalDropInterval = null; // Single global interval
         this.userStats = new Collection(); // userId -> stats
         
         // Drop configuration
@@ -36,7 +36,6 @@ class WonderCoinsDropSystem {
         };
         
         this.loadDropChannels();
-        this.startDropIntervals();
     }
 
     async loadDropChannels() {
@@ -49,34 +48,55 @@ class WonderCoinsDropSystem {
                 this.dropChannels.get(channel.guild_id).push(channel.channel_id);
             }
             console.log('✅ Loaded drop channels for', this.dropChannels.size, 'guilds');
+            
+            // Start single global drop interval for all guilds
+            this.startGlobalDropInterval();
         } catch (error) {
             console.error('Error loading drop channels:', error);
         }
     }
 
-    startDropIntervals() {
-        // Start intervals for each guild
-        for (const [guildId, channelIds] of this.dropChannels) {
-            this.startGuildDropInterval(guildId);
-        }
-    }
-
-    startGuildDropInterval(guildId) {
-        if (this.dropIntervals.has(guildId)) {
-            clearInterval(this.dropIntervals.get(guildId));
+    startGlobalDropInterval() {
+        // Clear existing interval if any
+        if (this.globalDropInterval) {
+            clearInterval(this.globalDropInterval);
         }
 
         const scheduleNextDrop = () => {
             const randomInterval = Math.random() * (this.config.maxInterval - this.config.minInterval) + this.config.minInterval;
             
             setTimeout(() => {
-                this.triggerRandomDrop(guildId);
+                this.triggerGlobalRandomDrop();
                 scheduleNextDrop(); // Schedule the next drop
             }, randomInterval);
         };
 
         scheduleNextDrop();
-        console.log(`🎯 Started drop interval for guild ${guildId}`);
+        console.log(`🎯 Started global drop interval`);
+    }
+
+    async triggerGlobalRandomDrop() {
+        // Get all channels from all guilds
+        const allChannels = [];
+        for (const [guildId, channelIds] of this.dropChannels) {
+            for (const channelId of channelIds) {
+                allChannels.push({ guildId, channelId });
+            }
+        }
+
+        if (allChannels.length === 0) return;
+
+        // Pick a random channel from all available channels
+        const randomChannel = allChannels[Math.floor(Math.random() * allChannels.length)];
+        const channel = this.client.channels.cache.get(randomChannel.channelId);
+        
+        if (!channel) {
+            console.log(`Channel ${randomChannel.channelId} not found, removing from drop list`);
+            this.removeDropChannel(randomChannel.guildId, randomChannel.channelId);
+            return;
+        }
+
+        await this.createDrop(channel);
     }
 
     async triggerRandomDrop(guildId) {
@@ -381,7 +401,10 @@ class WonderCoinsDropSystem {
             
             if (!this.dropChannels.has(guildId)) {
                 this.dropChannels.set(guildId, []);
-                this.startGuildDropInterval(guildId);
+                // Restart global interval if this is the first channel being added
+                if (this.dropChannels.size === 1) {
+                    this.startGlobalDropInterval();
+                }
             }
             
             if (!this.dropChannels.get(guildId).includes(channelId)) {
@@ -406,14 +429,16 @@ class WonderCoinsDropSystem {
                     channels.splice(index, 1);
                 }
                 
-                // If no channels left, stop the interval
+                // If no channels left, remove guild and stop global interval if no guilds left
                 if (channels.length === 0) {
-                    const intervalId = this.dropIntervals.get(guildId);
-                    if (intervalId) {
-                        clearInterval(intervalId);
-                        this.dropIntervals.delete(guildId);
-                    }
                     this.dropChannels.delete(guildId);
+                    
+                    // Stop global interval if no guilds have channels
+                    if (this.dropChannels.size === 0 && this.globalDropInterval) {
+                        clearInterval(this.globalDropInterval);
+                        this.globalDropInterval = null;
+                        console.log('🛑 Stopped global drop interval - no active channels');
+                    }
                 }
             }
             

@@ -19,6 +19,18 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 - **Lucky Charm Effect**: Use items to increase win rates
 - **Premium Perks**: Reduced cooldowns for boosters and premium members
 
+### 🪙 WonderCoins Drop System
+- **Random Drops**: Automated WonderCoins drops every 30 minutes to 3 hours
+- **Rarity System**: Common, Rare (3x), Epic (5x), Legendary (10x) drops
+- **Fun Collection Mechanics**: 
+  - 💰 **Standard Collection**: Normal amount collection
+  - ⚡ **Quick Grab**: First 3 collectors get double coins!
+  - 🍀 **Lucky Grab**: 30% chance for 1.5x bonus coins
+- **Role Multipliers**: Premium (+50%) and Booster (+25%) bonuses
+- **Admin Controls**: Setup drop channels, manual triggers, statistics
+- **Competition Elements**: Server leaderboards and personal statistics
+- **Time-Limited**: 60-second collection window creates excitement
+
 ### 📝 Introduction Cards
 - **Custom Cards**: Create beautiful introduction cards with your info
 - **Image Generation**: Automatically generated images with Canvas
@@ -139,6 +151,16 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 | `w.dice` / `/dice` | Dice rolling game | `w.dice 50` |
 | `w.slots` / `/slots` | Slot machine game | `w.slots 25` |
 
+### 🪙 WonderCoins Drop Commands
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `/drops setup` | Setup drop channels (Admin) | `/drops setup channel:#general` |
+| `/drops remove` | Remove drop channels (Admin) | `/drops remove channel:#general` |
+| `/drops list` | List active drop channels | `/drops list` |
+| `/drops stats` | View server drop statistics | `/drops stats` |
+| `/drops mystats` | View your personal drop stats | `/drops mystats` |
+| `/drops trigger` | Manual drop trigger (Admin) | `/drops trigger channel:#general amount:100 rarity:epic` |
+
 ### 📝 Introduction Commands
 | Command | Description | Usage |
 |---------|-------------|-------|
@@ -233,18 +255,34 @@ To prevent spam and maintain balance, commands have cooldowns:
 - **Dice**: Bet 10-500 WonderCash
 - **Slots**: Bet 20-200 WonderCash
 
+### WonderCoins Drop Mechanics
+- **Drop Amount**: 10-500 WonderCoins base amount
+- **Drop Timing**: Random intervals between 30 minutes to 3 hours
+- **Collection Time**: 60 seconds to collect after drop appears
+- **Rarity Chances**:
+  - Common: Base amount (most frequent)
+  - Rare: 3x multiplier (10% chance)
+  - Epic: 5x multiplier (5% chance)
+  - Legendary: 10x multiplier (1% chance)
+- **Collection Types**:
+  - Standard: Normal amount
+  - Quick Grab: 2x coins for first 3 collectors
+  - Lucky Grab: 30% chance for 1.5x bonus
+- **Role Bonuses**: Premium (+50%), Booster (+25%)
+
 ## 📁 Project Structure
 
 ```
 wonder-discord-bot/
 ├── src/
-│   ├── index.js              # Main bot file
-│   ├── database.js           # SQLite database management
-│   ├── slash-commands.js     # Slash command definitions
-│   ├── slash-handlers.js     # Slash command handlers
-│   ├── role-manager.js       # Role and perks management
+│   ├── index.js                    # Main bot file
+│   ├── database.js                 # SQLite database management
+│   ├── slash-commands.js           # Slash command definitions
+│   ├── slash-handlers.js           # Slash command handlers
+│   ├── role-manager.js             # Role and perks management
+│   ├── wondercoins-drop-system.js  # WonderCoins drop system
 │   └── utils/
-│       └── canvas.js         # Image generation utilities
+│       └── canvas.js               # Image generation utilities
 ├── config.json               # Bot configuration
 ├── package.json              # Dependencies and scripts
 ├── .env.example             # Environment variables template
@@ -258,6 +296,9 @@ The bot uses SQLite with the following tables:
 - `introduction_cards` - Introduction card information
 - `server_settings` - Per-server configuration
 - `transactions` - Transaction history
+- `drop_channels` - WonderCoins drop channel configuration
+- `drop_stats` - Detailed drop collection statistics
+- `user_drop_stats` - Personal drop statistics summary
 
 ## 🎨 Customization
 
