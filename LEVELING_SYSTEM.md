@@ -1,11 +1,20 @@
-# 🏆 Wonder Bot Leveling System
+# 👑 Y2K Kingdom Leveling System
 
-The Wonder Bot now features a comprehensive multi-tiered leveling system that rewards user activity across different categories!
+Welcome to the **Y2K Kingdom** - where cyber meets royalty in a stunning aesthetic experience! 
+
+The Y2K Kingdom Bot features a comprehensive multi-tiered leveling system that rewards user activity across different categories with a beautiful, minimalist yet user-friendly design.
+
+## 🔮 **Y2K Kingdom Aesthetic Features**
+- **Cyber-Royal Color Palette:** Pink, purple, cyan, and gold
+- **Minimalist UI:** Clean, beautiful embeds with strategic emoji usage
+- **Royal Status System:** Kingdom citizenship tiers and legendary status
+- **Progressive Visual Feedback:** Level badges, progress bars, and status indicators
+- **User-Friendly Experience:** Intuitive commands and clear information hierarchy
 
 ## 🚨 IMPORTANT: Level Cap
-**All level types are capped at Level 50!** Once you reach the maximum level, you become a true server legend! 🏆
+**All level types are capped at Level 50!** Once you reach the maximum level, you become a true **KINGDOM LEGEND**! 👑
 
-## 📊 Level Types
+## 📊 Kingdom Level Types
 
 ### 💬 Text Level
 - **How to earn:** Send messages in chat channels
@@ -13,6 +22,7 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
 - **Cooldown:** 1 minute between XP gains
 - **Bonuses:** Longer messages (>50 characters) give bonus XP
 - **Max Level:** 50
+- **Royal Status:** Text mastery and communication excellence
 
 ### 🎤 Voice Level  
 - **How to earn:** Spend time in voice channels
@@ -21,6 +31,7 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
 - **Bonuses:** Being in voice with other members gives extra XP
 - **⚠️ IMPORTANT:** You must be unmuted (both server and self) to earn voice XP!
 - **Max Level:** 50
+- **Royal Status:** Social engagement and community presence
 
 ### ⭐ Role Level
 - **How to earn:** Complete daily activities and achievements
@@ -32,57 +43,59 @@ The Wonder Bot now features a comprehensive multi-tiered leveling system that re
   - Helping others: 100 XP
   - Event participation: 200 XP
 - **Max Level:** 50
+- **Royal Status:** Kingdom contribution and civic duty
 
-### 🏆 Overall Level
+### 🏰 Kingdom Level (Overall)
 - **Combined XP:** Sum of all Text, Voice, and Role XP
 - **Master progression:** Represents your overall server engagement
 - **Max Level:** 50
+- **Royal Status:** Ultimate kingdom citizenship and legendary status
 
-## 🎁 Level Rewards (Updated for Level 50 Cap)
+## 🎁 Royal Rewards (Updated for Level 50 Cap)
 
-### Fixed Currency & Title Rewards
+### Fixed CyberCoin & Title Rewards
 These rewards are automatically given and cannot be changed:
 
 ### Text Level Rewards
-- **Level 5:** 500 💰 WonderCash
-- **Level 10:** 1,000 💰 WonderCash
-- **Level 20:** 2,000 💰 WonderCash
+- **Level 5:** 500 💎 CyberCoins
+- **Level 10:** 1,000 💎 CyberCoins
+- **Level 20:** 2,000 💎 CyberCoins
 - **Level 25:** Text Master title
-- **Level 30:** 5,000 💰 WonderCash
-- **Level 35:** 7,500 💰 WonderCash
-- **Level 40:** 10,000 💰 WonderCash
-- **Level 45:** 15,000 💰 WonderCash
-- **Level 50:** 🏆 25,000 💰 WonderCash - MAX LEVEL ACHIEVED!
+- **Level 30:** 5,000 💎 CyberCoins
+- **Level 35:** 7,500 💎 CyberCoins
+- **Level 40:** 10,000 💎 CyberCoins
+- **Level 45:** 15,000 💎 CyberCoins
+- **Level 50:** 👑 25,000 💎 CyberCoins - KINGDOM LEGEND STATUS!
 
 ### Voice Level Rewards
-- **Level 5:** 750 💰 WonderCash
-- **Level 10:** 1,500 💰 WonderCash
-- **Level 20:** 3,000 💰 WonderCash
+- **Level 5:** 750 💎 CyberCoins
+- **Level 10:** 1,500 💎 CyberCoins
+- **Level 20:** 3,000 💎 CyberCoins
 - **Level 25:** Voice Champion title
-- **Level 30:** 7,500 💰 WonderCash
-- **Level 35:** 10,000 💰 WonderCash
-- **Level 40:** 15,000 💰 WonderCash
-- **Level 45:** 20,000 💰 WonderCash
-- **Level 50:** 🏆 35,000 💰 WonderCash - MAX LEVEL ACHIEVED!
+- **Level 30:** 7,500 💎 CyberCoins
+- **Level 35:** 10,000 💎 CyberCoins
+- **Level 40:** 15,000 💎 CyberCoins
+- **Level 45:** 20,000 💎 CyberCoins
+- **Level 50:** 👑 35,000 💎 CyberCoins - KINGDOM LEGEND STATUS!
 
 ### Role Level Rewards
-- **Level 5:** 1,000 💰 WonderCash
-- **Level 10:** 2,500 💰 WonderCash
-- **Level 20:** 5,000 💰 WonderCash
+- **Level 5:** 1,000 💎 CyberCoins
+- **Level 10:** 2,500 💎 CyberCoins
+- **Level 20:** 5,000 💎 CyberCoins
 - **Level 25:** Community Leader title
-- **Level 30:** 10,000 💰 WonderCash
-- **Level 35:** 15,000 💰 WonderCash
-- **Level 40:** 20,000 💰 WonderCash
-- **Level 45:** 30,000 💰 WonderCash
-- **Level 50:** 🏆 50,000 💰 WonderCash - MAX LEVEL ACHIEVED!
+- **Level 30:** 10,000 💎 CyberCoins
+- **Level 35:** 15,000 💎 CyberCoins
+- **Level 40:** 20,000 💎 CyberCoins
+- **Level 45:** 30,000 💎 CyberCoins
+- **Level 50:** 👑 50,000 💎 CyberCoins - KINGDOM LEGEND STATUS!
 
-### Overall Level Rewards
-- **Level 10:** 2,000 💰 WonderCash
-- **Level 30:** 10,000 💰 WonderCash
-- **Level 35:** 15,000 💰 WonderCash
-- **Level 40:** 25,000 💰 WonderCash
+### Kingdom Level Rewards (Overall)
+- **Level 10:** 2,000 💎 CyberCoins
+- **Level 30:** 10,000 💎 CyberCoins
+- **Level 35:** 15,000 💎 CyberCoins
+- **Level 40:** 25,000 💎 CyberCoins
 - **Level 45:** Server Grandmaster title
-- **Level 50:** 🏆 100,000 💰 WonderCash - ULTIMATE LEGEND STATUS!
+- **Level 50:** 👑 100,000 💎 CyberCoins - ULTIMATE KINGDOM LEGEND STATUS!
 
 ### 🎭 Configurable Role Rewards
 **NEW FEATURE:** Admins can now set custom role rewards for any level!

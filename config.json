@@ -1,10 +1,16 @@
 {
   "prefix": "w.",
   "currency": {
-    "name": "WonderCash",
-    "symbol": "💰",
+    "name": "CyberCoins",
+    "symbol": "💎",
     "dailyAmount": 100,
     "workAmount": 50
+  },
+  "branding": {
+    "name": "Y2K Kingdom Bot",
+    "tagline": "Cyber Royalty Awaits",
+    "version": "2.0.0",
+    "theme": "Y2K Kingdom Aesthetic"
   },
   "booster": {
     "dailyBonus": 50,
@@ -32,11 +38,41 @@
     }
   },
   "colors": {
-    "primary": "#7C3AED",
-    "success": "#10B981",
-    "error": "#EF4444",
-    "warning": "#F59E0B",
-    "info": "#3B82F6"
+    "primary": "#FF6B9D",
+    "secondary": "#C44569", 
+    "accent": "#40E0D0",
+    "success": "#00D4AA",
+    "error": "#FF3838",
+    "warning": "#FFB800",
+    "info": "#3742FA",
+    "royal": "#7209B7",
+    "cyber": "#00FFFF",
+    "kingdom": "#FFD700",
+    "background": "#1A0E3D",
+    "text": "#E0E0E0"
+  },
+  "theme": {
+    "name": "Y2K Kingdom",
+    "style": "cyber-royal",
+    "emojis": {
+      "crown": "👑",
+      "gem": "💎",
+      "star": "⭐",
+      "cyber": "🔮",
+      "kingdom": "🏰",
+      "royal": "🎭",
+      "crystal": "💠",
+      "magic": "✨",
+      "throne": "🪑",
+      "scepter": "🔱"
+    },
+    "prefixes": {
+      "royal": "『ROYAL』",
+      "cyber": "『CYBER』", 
+      "kingdom": "『KINGDOM』",
+      "legend": "『LEGEND』",
+      "elite": "『ELITE』"
+    }
   },
   "cooldowns": {
     "daily": 1440,

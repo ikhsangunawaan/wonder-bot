@@ -2,10 +2,12 @@ const { EmbedBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discor
 const database = require('./database');
 const config = require('../config.json');
 const CanvasUtils = require('./utils/canvas');
+const Y2KDesign = require('./utils/y2k-design');
 
 class SlashHandlers {
     constructor() {
         this.canvas = new CanvasUtils();
+        this.design = new Y2KDesign();
     }
 
     async handleBalance(interaction) {
@@ -13,20 +15,47 @@ class SlashHandlers {
         const user = await database.getUser(targetUser.id);
         
         if (!user) {
-            await database.createUser(targetUser.id, targetUser.username);
-            const newUser = await database.getUser(targetUser.id);
-            user = newUser;
+            await interaction.reply('❌ User not found in the system!');
+            return;
         }
 
-        const embed = new EmbedBuilder()
-            .setColor(config.colors.primary)
-            .setTitle(`💰 ${targetUser.username}'s Wallet`)
-            .setDescription(`**Balance:** ${user.balance} ${config.currency.symbol} ${config.currency.name}`)
-            .setThumbnail(targetUser.displayAvatarURL())
-            .setFooter({ text: 'Wonder Bot Economy' })
-            .setTimestamp();
+        // Get user level data for status display
+        const levelData = await database.getUserLevels(targetUser.id);
+        const maxLevel = Math.max(levelData.text_level, levelData.voice_level, levelData.role_level, levelData.overall_level);
+        
+        // Create styled elements
+        const styledUsername = this.design.styleUsername(targetUser.username, maxLevel);
+        const balanceAmount = this.design.styleRewardMessage(user.balance, config.currency.symbol);
+        const titlePrefix = maxLevel >= 40 ? 'royal' : (maxLevel >= 25 ? 'elite' : 'cyber');
+        const title = this.design.styleTitle(`${styledUsername}'s Treasury`, titlePrefix);
+        
+        const embed = this.design.createEmbed('royal')
+            .setTitle(`${this.design.theme.emojis.gem} ${title}`)
+            .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 256 }))
+            .addFields([
+                {
+                    name: `${this.design.theme.emojis.magic} Current Balance`,
+                    value: balanceAmount,
+                    inline: true
+                },
+                {
+                    name: `${this.design.theme.emojis.royal} Kingdom Status`,
+                    value: this.getKingdomStatusSlim(maxLevel),
+                    inline: true
+                }
+            ])
+            .setFooter({ text: this.design.createFooter() });
 
         await interaction.reply({ embeds: [embed] });
+    }
+
+    // Helper method for slim kingdom status
+    getKingdomStatusSlim(maxLevel) {
+        if (maxLevel >= 50) return `${this.design.theme.emojis.crown} LEGEND`;
+        if (maxLevel >= 40) return `${this.design.theme.emojis.gem} ROYAL ELITE`;
+        if (maxLevel >= 25) return `${this.design.theme.emojis.star} CYBER NOBLE`;
+        if (maxLevel >= 10) return `${this.design.theme.emojis.crystal} CITIZEN`;
+        return `${this.design.theme.emojis.magic} NEW ARRIVAL`;
     }
 
     async handleDaily(interaction) {
@@ -368,53 +397,52 @@ class SlashHandlers {
     }
 
     async handleHelp(interaction) {
-        const embed = new EmbedBuilder()
-            .setColor(config.colors.primary)
-            .setTitle('🤖 Wonder Bot Commands')
-            .setDescription('Here are all the available commands:')
+        const embed = this.design.createEmbed('cyber')
+            .setTitle(`${this.design.theme.emojis.kingdom} ${this.design.styleTitle('Y2K Kingdom Commands', 'royal')}`)
+            .setDescription(`${this.design.theme.emojis.magic} **Welcome to the Y2K Kingdom!** ${this.design.theme.emojis.magic}\n${this.design.createDivider()}\nHere are all available commands to rule your digital empire:`)
             .addFields(
                 {
-                    name: '💰 Economy Commands',
-                    value: '`/balance` - Check WonderCash balance\n`/daily` - Claim daily reward\n`/work` - Work for WonderCash\n`/leaderboard` - View top earners',
+                    name: `${this.design.theme.emojis.gem} Economy Commands`,
+                    value: '`/balance` - Check WonderCash treasury\n`/daily` - Claim royal daily reward\n`/work` - Work for the kingdom\n`/leaderboard` - View top earners',
                     inline: false
                 },
                 {
-                    name: '🎮 Game Commands',
-                    value: '`/coinflip` - Coin flip game\n`/dice` - Dice rolling game\n`/slots` - Slot machine',
+                    name: `${this.design.theme.emojis.cyber} Game Commands`,
+                    value: '`/coinflip` - Cyber coin flip game\n`/dice` - Digital dice rolling\n`/slots` - Y2K slot machine',
                     inline: false
                 },
                 {
-                    name: '📝 Introduction Commands',
-                    value: '`/intro create` - Create introduction card\n`/intro view` - View introduction cards',
+                    name: `${this.design.theme.emojis.royal} Introduction Commands`,
+                    value: '`/intro create` - Create royal introduction card\n`/intro view` - View citizen profiles',
                     inline: false
                 },
                 {
-                    name: '🎉 Giveaway Commands',
-                    value: '`/giveaway start` - Start giveaway (Admin)\n`/giveaway list` - List active giveaways\n`/giveaway wins` - View your wins',
+                    name: `${this.design.theme.emojis.crown} Leveling Commands`,
+                    value: '`/level` - Check your kingdom levels and XP\n`/rank` - View royal leaderboards\n`/rewards` - Claim level rewards\n`/give-xp` - Give XP (Admin)\n`/reset-level` - Reset levels (Admin)',
                     inline: false
                 },
                 {
-                    name: '📊 Leveling Commands',
-                    value: '`/level` - Check your levels and XP\n`/rank` - View leaderboards\n`/rewards` - Claim level rewards\n`/give-xp` - Give XP (Admin)\n`/reset-level` - Reset levels (Admin)',
+                    name: `${this.design.theme.emojis.star} Giveaway Commands`,
+                    value: '`/giveaway start` - Start royal giveaway (Admin)\n`/giveaway list` - List active giveaways\n`/giveaway wins` - View your victories',
                     inline: false
                 },
                 {
-                    name: '⚙️ Admin Commands',
-                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel\n`/give-xp` - Give XP to users\n`/reset-level` - Reset user levels\n`/level-role set` - Set role rewards for levels\n`/level-role remove` - Remove role rewards\n`/level-role list` - List all role rewards',
+                    name: `${this.design.theme.emojis.scepter} Admin Commands`,
+                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel\n`/level-role set` - Set role rewards for levels\n`/level-role remove` - Remove role rewards\n`/level-role list` - List all role rewards',
                     inline: false
                 },
                 {
-                    name: '💎 Exclusive Perks',
+                    name: `${this.design.theme.emojis.magic} Exclusive Perks`,
                     value: '**Server Boosters:** +50 daily, +25 work bonus, **1.5x XP**, **2x giveaway odds**\n**Premium Members:** +100 daily, +50 work bonus, **1.75x XP**, **3x giveaway odds**, **bypass winner restrictions**',
                     inline: false
                 },
                 {
-                    name: '🏆 Leveling System',
-                    value: '**Text Level:** Gain XP by chatting (15-25 XP per message)\n**Voice Level:** Gain XP in voice channels (10-15 XP per minute, only when unmuted)\n**Role Level:** Gain XP through daily activities and achievements\n**Overall Level:** Combined progress from all categories\n\n**🏆 MAX LEVEL: 50 for all categories!**',
+                    name: `${this.design.theme.emojis.kingdom} Y2K Leveling System`,
+                    value: '**Text Level:** Gain XP by chatting (15-25 XP per message)\n**Voice Level:** Gain XP in voice channels (10-15 XP per minute, only when unmuted)\n**Role Level:** Gain XP through daily activities and achievements\n**Kingdom Level:** Combined progress from all categories\n\n**🏆 MAX LEVEL: 50 for all categories!**',
                     inline: false
                 }
             )
-            .setFooter({ text: 'Wonder Bot - Making Discord communities amazing!' })
+            .setFooter({ text: this.design.createFooter('Y2K Kingdom Bot • Cyber Royalty Awaits') })
             .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
@@ -677,35 +705,47 @@ class SlashHandlers {
 
             const topUsers = await database.getTopUsers(type, 15);
             
-            const typeEmojis = {
-                text: '💬',
-                voice: '🎤',
-                role: '⭐',
-                overall: '🏆'
-            };
+            // Create styled title
+            const typeName = type === 'overall' ? 'Kingdom' : type.charAt(0).toUpperCase() + type.slice(1);
+            const title = this.design.styleTitle(`${typeName} Leaderboard`, 'royal');
+            const icon = this.design.getLevelTypeIcon(type);
 
-            const embed = new EmbedBuilder()
-                .setColor(config.colors.primary)
-                .setTitle(`${typeEmojis[type]} ${type.charAt(0).toUpperCase() + type.slice(1)} Leaderboard`)
+            const embed = this.design.createEmbed('royal')
+                .setTitle(`${icon} ${title}`)
+                .setDescription(`${this.design.theme.emojis.magic} **Top Performers in the Y2K Kingdom** ${this.design.theme.emojis.magic}`)
                 .setTimestamp();
 
             if (topUsers.length === 0) {
-                embed.setDescription('No users found on the leaderboard yet!');
+                embed.addFields([{
+                    name: `${this.design.theme.emojis.crystal} No Data`,
+                    value: 'No users found on the leaderboard yet!',
+                    inline: false
+                }]);
             } else {
                 let description = '';
                 for (let i = 0; i < topUsers.length; i++) {
                     const user = topUsers[i];
                     const position = i + 1;
-                    const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : `${position}.`;
+                    const rankDisplay = this.design.createRankDisplay(position);
                     
                     const xpKey = type === 'overall' ? 'total_xp' : `${type}_xp`;
                     const levelKey = type === 'overall' ? 'overall_level' : `${type}_level`;
                     
-                    description += `${medal} **${user.username}** - Level ${user[levelKey]} (${user[xpKey].toLocaleString()} XP)\n`;
+                    const levelBadge = this.design.createLevelBadge(user[levelKey]);
+                    const styledUsername = this.design.styleUsername(user.username, user[levelKey]);
+                    const xpFormatted = this.design.formatNumber(user[xpKey]);
+                    
+                    description += `${rankDisplay} **${styledUsername}** ${this.design.createFieldSeparator()} ${levelBadge} ${this.design.createFieldSeparator()} ${xpFormatted} XP\n`;
                 }
-                embed.setDescription(description);
+                
+                embed.addFields([{
+                    name: `${this.design.theme.emojis.scepter} Royal Rankings`,
+                    value: description,
+                    inline: false
+                }]);
             }
 
+            embed.setFooter({ text: this.design.createFooter() });
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
             console.error('Error getting leaderboard:', error);

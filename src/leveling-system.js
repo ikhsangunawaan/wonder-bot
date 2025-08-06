@@ -1,12 +1,14 @@
 const { EmbedBuilder } = require('discord.js');
 const database = require('./database');
 const config = require('../config.json');
+const Y2KDesign = require('./utils/y2k-design');
 
 class LevelingSystem {
     constructor(client) {
         this.client = client;
         this.voiceSessions = new Map(); // Track active voice sessions
         this.xpCooldowns = new Map(); // Text XP cooldowns
+        this.design = new Y2KDesign(); // Y2K Design utility
         
         // XP Configuration
         this.xpConfig = {
@@ -386,43 +388,60 @@ class LevelingSystem {
     // Send level up message
     async sendLevelUpMessage(channel, userId, levelType, newLevel) {
         const user = await this.client.users.fetch(userId);
-        const typeEmojis = {
-            text: '💬',
-            voice: '🎤',
-            role: '⭐',
-            overall: '🏆'
-        };
-
         const isMaxLevel = newLevel >= this.levelFormula.maxLevel;
+        
+        // Get appropriate colors and styling
+        const embedColor = isMaxLevel ? this.design.colors.kingdom : this.design.getLevelColor(newLevel);
+        const levelIcon = this.design.getLevelTypeIcon(levelType, isMaxLevel);
+        const levelBadge = this.design.createLevelBadge(newLevel);
+        
+        // Create title with Y2K styling
+        const titlePrefix = isMaxLevel ? 'legend' : (newLevel >= 40 ? 'royal' : (newLevel >= 25 ? 'elite' : null));
         const title = isMaxLevel ? 
-            `${typeEmojis[levelType]} MAX LEVEL ACHIEVED!` : 
-            `${typeEmojis[levelType]} Level Up!`;
+            this.design.styleTitle('MAX LEVEL ACHIEVED!', 'legend') : 
+            this.design.styleTitle('LEVEL UP!', titlePrefix);
+        
+        // Create description with Y2K aesthetic
+        const styledUsername = this.design.styleUsername(user.username, newLevel);
+        const levelTypeName = levelType === 'overall' ? 'Kingdom' : levelType.charAt(0).toUpperCase() + levelType.slice(1);
         
         const description = isMaxLevel ?
-            `**${user.username}** has reached the MAXIMUM **${levelType === 'overall' ? 'Overall' : levelType.charAt(0).toUpperCase() + levelType.slice(1)} Level ${newLevel}**! 🎉\n\n**🏆 CONGRATULATIONS! You are now a true legend! 🏆**` :
-            `**${user.username}** just reached **${levelType === 'overall' ? 'Overall' : levelType.charAt(0).toUpperCase() + levelType.slice(1)} Level ${newLevel}**!`;
+            `${this.design.theme.emojis.crown} **${styledUsername}** has ascended to the ultimate **${levelTypeName} Level ${newLevel}**!\n\n${this.design.theme.emojis.magic} **CONGRATULATIONS! You are now a KINGDOM LEGEND!** ${this.design.theme.emojis.magic}` :
+            `${this.design.theme.emojis.star} **${styledUsername}** has reached **${levelTypeName} ${levelBadge}**!`;
 
-        const embed = new EmbedBuilder()
-            .setColor(isMaxLevel ? '#FFD700' : config.colors.success) // Gold color for max level
-            .setTitle(title)
+        const embed = this.design.createEmbed(isMaxLevel ? 'kingdom' : 'royal')
+            .setTitle(`${levelIcon} ${title}`)
             .setDescription(description)
-            .setThumbnail(user.displayAvatarURL())
-            .setTimestamp();
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }));
 
         // Add reward info if there's a reward for this level
         const rewards = this.levelRewards[levelType];
         if (rewards && rewards[newLevel]) {
             const reward = rewards[newLevel];
+            let rewardText = reward.message;
+            
+            // Style currency rewards
+            if (reward.type === 'currency') {
+                rewardText = `${this.design.styleRewardMessage(reward.amount, config.currency.symbol)} ${reward.message}`;
+            }
+            
             embed.addFields([{
-                name: '🎁 Level Reward',
-                value: reward.message,
+                name: `${this.design.theme.emojis.gem} Royal Reward`,
+                value: rewardText,
                 inline: false
             }]);
         }
 
-        // Add special footer for max level
+        // Add special styling for max level
         if (isMaxLevel) {
-            embed.setFooter({ text: '🏆 Maximum level reached! You are now a server legend! 🏆' });
+            embed.addFields([{
+                name: `${this.design.theme.emojis.crown} Kingdom Status`,
+                value: `${this.design.theme.emojis.magic} **LEGENDARY TIER UNLOCKED** ${this.design.theme.emojis.magic}\n${this.design.createDivider()}\nYou have reached the pinnacle of the Y2K Kingdom!`,
+                inline: false
+            }]);
+            embed.setFooter({ text: `${this.design.theme.emojis.crown} KINGDOM LEGEND ${this.design.theme.emojis.crown} • Ultimate Power Achieved` });
+        } else {
+            embed.setFooter({ text: this.design.createFooter() });
         }
 
         try {
@@ -438,13 +457,21 @@ class LevelingSystem {
         const user = await this.client.users.fetch(displayUserId);
         const levelData = await database.getUserLevels(displayUserId);
         
-        const embed = new EmbedBuilder()
-            .setColor(config.colors.primary)
-            .setTitle(`📊 ${user.username}'s Levels`)
-            .setThumbnail(user.displayAvatarURL())
-            .setTimestamp();
+        // Determine overall status and color
+        const maxLevel = Math.max(levelData.text_level, levelData.voice_level, levelData.role_level, levelData.overall_level);
+        const embedColor = this.design.getLevelColor(maxLevel);
+        const isLegendary = maxLevel >= this.levelFormula.maxLevel;
+        
+        // Create styled title
+        const styledUsername = this.design.styleUsername(user.username, maxLevel);
+        const titlePrefix = isLegendary ? 'legend' : (maxLevel >= 40 ? 'royal' : (maxLevel >= 25 ? 'elite' : 'cyber'));
+        const title = this.design.styleTitle(`${styledUsername}'s Kingdom Profile`, titlePrefix);
+        
+        const embed = this.design.createEmbed(isLegendary ? 'kingdom' : 'royal')
+            .setTitle(`${this.design.theme.emojis.kingdom} ${title}`)
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }));
 
-        // Calculate progress for each level type
+        // Calculate progress for each level type with Y2K styling
         const types = ['text', 'voice', 'role', 'overall'];
         const fields = [];
 
@@ -455,64 +482,69 @@ class LevelingSystem {
             const currentXP = levelData[xpKey];
             const currentLevel = levelData[levelKey];
             const progress = this.getXPProgress(currentXP, currentLevel);
+            const isMaxForType = currentLevel >= this.levelFormula.maxLevel;
             
-            const emoji = type === 'text' ? '💬' : type === 'voice' ? '🎤' : type === 'role' ? '⭐' : '🏆';
-            const typeName = type === 'overall' ? 'Overall' : type.charAt(0).toUpperCase() + type.slice(1);
+            // Get styled elements
+            const icon = this.design.getLevelTypeIcon(type, isMaxForType);
+            const levelBadge = this.design.createLevelBadge(currentLevel);
+            const typeName = type === 'overall' ? 'Kingdom' : type.charAt(0).toUpperCase() + type.slice(1);
             
-            const levelDisplay = currentLevel >= this.levelFormula.maxLevel ? 
-                `${currentLevel} 🏆 MAX` : 
-                `${currentLevel}`;
+            // Create progress bar
+            const progressBar = progress.isMaxLevel ? 
+                `${this.design.theme.emojis.crown} MAX LEVEL ${this.design.theme.emojis.crown}` :
+                `${this.design.createProgressBar(progress.current, progress.needed)} ${progress.percentage}%`;
             
-            const progressDisplay = progress.isMaxLevel ?
-                `**XP:** ${currentXP.toLocaleString()}\n**Progress:** MAX LEVEL ACHIEVED! 🏆` :
-                `**XP:** ${currentXP.toLocaleString()}\n**Progress:** ${progress.current}/${progress.needed} (${progress.percentage}%)`;
+            const xpDisplay = progress.isMaxLevel ?
+                `**XP:** ${this.design.formatNumber(currentXP)}\n**Status:** ${this.design.theme.emojis.magic} LEGENDARY ${this.design.theme.emojis.magic}` :
+                `**XP:** ${this.design.formatNumber(currentXP)}\n**Progress:** ${progressBar}`;
             
             fields.push({
-                name: `${emoji} ${typeName} Level ${levelDisplay}`,
-                value: progressDisplay,
+                name: `${icon} ${typeName} ${levelBadge}`,
+                value: xpDisplay,
                 inline: true
             });
         });
 
         embed.addFields(fields);
 
-        // Add additional stats
+        // Add additional stats with Y2K styling
         if (levelData.voice_time_total > 0) {
             const hours = Math.floor(levelData.voice_time_total / 60);
             const minutes = levelData.voice_time_total % 60;
             embed.addFields([{
-                name: '🎤 Voice Time',
-                value: `${hours}h ${minutes}m total`,
+                name: `${this.design.theme.emojis.cyber} Voice Activity`,
+                value: `${this.design.theme.emojis.magic} **${hours}h ${minutes}m** total engagement`,
                 inline: true
             }]);
         }
 
-        // Add configured role rewards info
+        // Add Kingdom Status
+        const kingdomStatus = this.getKingdomStatus(maxLevel);
+        embed.addFields([{
+            name: `${this.design.theme.emojis.royal} Kingdom Status`,
+            value: kingdomStatus,
+            inline: false
+        }]);
+
+        // Add configured role rewards info with Y2K styling
         try {
             const allRoleRewards = await database.getAllLevelRoleRewards();
             if (allRoleRewards.length > 0) {
-                let roleRewardsText = '';
-                const userRewards = allRoleRewards.filter(reward => {
-                    const userLevel = levelData[reward.level_type === 'overall' ? 'overall_level' : `${reward.level_type}_level`];
-                    return userLevel >= reward.level;
-                });
-
                 const upcomingRewards = allRoleRewards.filter(reward => {
                     const userLevel = levelData[reward.level_type === 'overall' ? 'overall_level' : `${reward.level_type}_level`];
                     return userLevel < reward.level;
-                }).slice(0, 3); // Show next 3 upcoming rewards
+                }).slice(0, 3);
 
                 if (upcomingRewards.length > 0) {
-                    roleRewardsText = upcomingRewards.map(reward => {
-                        const typeEmoji = reward.level_type === 'text' ? '💬' : 
-                                        reward.level_type === 'voice' ? '🎤' : 
-                                        reward.level_type === 'role' ? '⭐' : '🏆';
-                        return `${typeEmoji} Level ${reward.level}: **${reward.role_name}**`;
+                    const rewardsText = upcomingRewards.map(reward => {
+                        const icon = this.design.getLevelTypeIcon(reward.level_type);
+                        const badge = this.design.createLevelBadge(reward.level);
+                        return `${icon} ${badge} ${this.design.createFieldSeparator()} **${reward.role_name}**`;
                     }).join('\n');
 
                     embed.addFields([{
-                        name: '🎁 Upcoming Role Rewards',
-                        value: roleRewardsText,
+                        name: `${this.design.theme.emojis.gem} Upcoming Royal Rewards`,
+                        value: rewardsText,
                         inline: false
                     }]);
                 }
@@ -521,7 +553,23 @@ class LevelingSystem {
             console.error('Error fetching role rewards for embed:', error);
         }
 
+        embed.setFooter({ text: this.design.createFooter() });
         return embed;
+    }
+
+    // Get Kingdom Status based on level
+    getKingdomStatus(maxLevel) {
+        if (maxLevel >= this.levelFormula.maxLevel) {
+            return `${this.design.theme.emojis.crown} **KINGDOM LEGEND** ${this.design.createDivider()} Ultimate Power Achieved`;
+        } else if (maxLevel >= 40) {
+            return `${this.design.theme.emojis.gem} **ROYAL ELITE** ${this.design.createDivider()} Noble Status Unlocked`;
+        } else if (maxLevel >= 25) {
+            return `${this.design.theme.emojis.star} **CYBER NOBLE** ${this.design.createDivider()} Advanced Citizen`;
+        } else if (maxLevel >= 10) {
+            return `${this.design.theme.emojis.crystal} **KINGDOM CITIZEN** ${this.design.createDivider()} Rising Member`;
+        } else {
+            return `${this.design.theme.emojis.magic} **NEW ARRIVAL** ${this.design.createDivider()} Welcome to the Kingdom`;
+        }
     }
 
     // Start voice session tracking
