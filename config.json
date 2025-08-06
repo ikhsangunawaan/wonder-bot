@@ -1,16 +1,16 @@
 {
   "prefix": "w.",
   "currency": {
-    "name": "CyberCoins",
-    "symbol": "💎",
+    "name": "GoldCoins",
+    "symbol": "👑",
     "dailyAmount": 100,
     "workAmount": 50
   },
   "branding": {
-    "name": "Y2K Kingdom Bot",
-    "tagline": "Cyber Royalty Awaits",
+    "name": "Luxury Kingdom Bot",
+    "tagline": "Royal Elegance Awaits",
     "version": "2.0.0",
-    "theme": "Y2K Kingdom Aesthetic"
+    "theme": "Luxury Kingdom Aesthetic"
   },
   "booster": {
     "dailyBonus": 50,
@@ -38,40 +38,45 @@
     }
   },
   "colors": {
-    "primary": "#FF6B9D",
-    "secondary": "#C44569", 
-    "accent": "#40E0D0",
-    "success": "#00D4AA",
-    "error": "#FF3838",
-    "warning": "#FFB800",
-    "info": "#3742FA",
-    "royal": "#7209B7",
-    "cyber": "#00FFFF",
+    "primary": "#FFD700",
+    "secondary": "#DAA520", 
+    "accent": "#8B4513",
+    "success": "#228B22",
+    "error": "#DC143C",
+    "warning": "#FF8C00",
+    "info": "#4169E1",
+    "royal": "#800080",
+    "luxury": "#FF69B4",
     "kingdom": "#FFD700",
-    "background": "#1A0E3D",
-    "text": "#E0E0E0"
+    "background": "#2F1B69",
+    "text": "#F5F5DC"
   },
   "theme": {
-    "name": "Y2K Kingdom",
-    "style": "cyber-royal",
+    "name": "Luxury Kingdom",
+    "style": "royal-luxury",
     "emojis": {
       "crown": "👑",
       "gem": "💎",
       "star": "⭐",
-      "cyber": "🔮",
-      "kingdom": "🏰",
+      "castle": "🏰",
+      "kingdom": "🏛️",
       "royal": "🎭",
-      "crystal": "💠",
+      "diamond": "💍",
       "magic": "✨",
       "throne": "🪑",
-      "scepter": "🔱"
+      "scepter": "🔱",
+      "treasure": "💰",
+      "medal": "🏅",
+      "ribbon": "🎀",
+      "pearl": "🦪"
     },
     "prefixes": {
       "royal": "『ROYAL』",
-      "cyber": "『CYBER』", 
+      "luxury": "『LUXURY』", 
       "kingdom": "『KINGDOM』",
       "legend": "『LEGEND』",
-      "elite": "『ELITE』"
+      "elite": "『NOBLE』",
+      "majestic": "『MAJESTIC』"
     }
   },
   "cooldowns": {

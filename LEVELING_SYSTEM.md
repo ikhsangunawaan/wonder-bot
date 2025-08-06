@@ -1,14 +1,14 @@
-# 👑 Y2K Kingdom Leveling System
+# 👑 Luxury Kingdom Leveling System
 
-Welcome to the **Y2K Kingdom** - where cyber meets royalty in a stunning aesthetic experience! 
+Welcome to the **Luxury Kingdom** - where royal elegance meets sophisticated progression! 
 
-The Y2K Kingdom Bot features a comprehensive multi-tiered leveling system that rewards user activity across different categories with a beautiful, minimalist yet user-friendly design.
+The Luxury Kingdom Bot features a comprehensive multi-tiered leveling system that rewards user activity across different categories with a beautiful, minimalist yet user-friendly design that celebrates nobility and luxury.
 
-## 🔮 **Y2K Kingdom Aesthetic Features**
-- **Cyber-Royal Color Palette:** Pink, purple, cyan, and gold
-- **Minimalist UI:** Clean, beautiful embeds with strategic emoji usage
-- **Royal Status System:** Kingdom citizenship tiers and legendary status
-- **Progressive Visual Feedback:** Level badges, progress bars, and status indicators
+## 🏰 **Luxury Kingdom Aesthetic Features**
+- **Royal Color Palette:** Gold, purple, brown, and emerald
+- **Minimalist UI:** Clean, beautiful embeds with elegant emoji usage
+- **Noble Status System:** Court hierarchy and aristocratic progression
+- **Progressive Visual Feedback:** Level badges, progress bars, and nobility indicators
 - **User-Friendly Experience:** Intuitive commands and clear information hierarchy
 
 ## 🚨 IMPORTANT: Level Cap
@@ -16,13 +16,13 @@ The Y2K Kingdom Bot features a comprehensive multi-tiered leveling system that r
 
 ## 📊 Kingdom Level Types
 
-### 💬 Text Level
+### 📜 Text Level
 - **How to earn:** Send messages in chat channels
 - **XP per message:** 15-25 XP (based on message length)
 - **Cooldown:** 1 minute between XP gains
 - **Bonuses:** Longer messages (>50 characters) give bonus XP
 - **Max Level:** 50
-- **Royal Status:** Text mastery and communication excellence
+- **Royal Status:** Literary mastery and scholarly communication
 
 ### 🎤 Voice Level  
 - **How to earn:** Spend time in voice channels
@@ -31,9 +31,9 @@ The Y2K Kingdom Bot features a comprehensive multi-tiered leveling system that r
 - **Bonuses:** Being in voice with other members gives extra XP
 - **⚠️ IMPORTANT:** You must be unmuted (both server and self) to earn voice XP!
 - **Max Level:** 50
-- **Royal Status:** Social engagement and community presence
+- **Royal Status:** Social engagement and court presence
 
-### ⭐ Role Level
+### 🏅 Role Level
 - **How to earn:** Complete daily activities and achievements
 - **Activities:**
   - Daily login: 50 XP
@@ -43,59 +43,59 @@ The Y2K Kingdom Bot features a comprehensive multi-tiered leveling system that r
   - Helping others: 100 XP
   - Event participation: 200 XP
 - **Max Level:** 50
-- **Royal Status:** Kingdom contribution and civic duty
+- **Royal Status:** Kingdom service and civic nobility
 
-### 🏰 Kingdom Level (Overall)
+### 🏛️ Kingdom Level (Overall)
 - **Combined XP:** Sum of all Text, Voice, and Role XP
-- **Master progression:** Represents your overall server engagement
+- **Master progression:** Represents your overall royal court standing
 - **Max Level:** 50
-- **Royal Status:** Ultimate kingdom citizenship and legendary status
+- **Royal Status:** Ultimate kingdom nobility and legendary status
 
-## 🎁 Royal Rewards (Updated for Level 50 Cap)
+## 🎁 Royal Treasury Rewards (Updated for Level 50 Cap)
 
-### Fixed CyberCoin & Title Rewards
+### Fixed GoldCoins & Title Rewards
 These rewards are automatically given and cannot be changed:
 
 ### Text Level Rewards
-- **Level 5:** 500 💎 CyberCoins
-- **Level 10:** 1,000 💎 CyberCoins
-- **Level 20:** 2,000 💎 CyberCoins
+- **Level 5:** 500 👑 GoldCoins
+- **Level 10:** 1,000 👑 GoldCoins
+- **Level 20:** 2,000 👑 GoldCoins
 - **Level 25:** Text Master title
-- **Level 30:** 5,000 💎 CyberCoins
-- **Level 35:** 7,500 💎 CyberCoins
-- **Level 40:** 10,000 💎 CyberCoins
-- **Level 45:** 15,000 💎 CyberCoins
-- **Level 50:** 👑 25,000 💎 CyberCoins - KINGDOM LEGEND STATUS!
+- **Level 30:** 5,000 👑 GoldCoins
+- **Level 35:** 7,500 👑 GoldCoins
+- **Level 40:** 10,000 👑 GoldCoins
+- **Level 45:** 15,000 👑 GoldCoins
+- **Level 50:** 👑 25,000 👑 GoldCoins - KINGDOM LEGEND STATUS!
 
 ### Voice Level Rewards
-- **Level 5:** 750 💎 CyberCoins
-- **Level 10:** 1,500 💎 CyberCoins
-- **Level 20:** 3,000 💎 CyberCoins
+- **Level 5:** 750 👑 GoldCoins
+- **Level 10:** 1,500 👑 GoldCoins
+- **Level 20:** 3,000 👑 GoldCoins
 - **Level 25:** Voice Champion title
-- **Level 30:** 7,500 💎 CyberCoins
-- **Level 35:** 10,000 💎 CyberCoins
-- **Level 40:** 15,000 💎 CyberCoins
-- **Level 45:** 20,000 💎 CyberCoins
-- **Level 50:** 👑 35,000 💎 CyberCoins - KINGDOM LEGEND STATUS!
+- **Level 30:** 7,500 👑 GoldCoins
+- **Level 35:** 10,000 👑 GoldCoins
+- **Level 40:** 15,000 👑 GoldCoins
+- **Level 45:** 20,000 👑 GoldCoins
+- **Level 50:** 👑 35,000 👑 GoldCoins - KINGDOM LEGEND STATUS!
 
 ### Role Level Rewards
-- **Level 5:** 1,000 💎 CyberCoins
-- **Level 10:** 2,500 💎 CyberCoins
-- **Level 20:** 5,000 💎 CyberCoins
+- **Level 5:** 1,000 👑 GoldCoins
+- **Level 10:** 2,500 👑 GoldCoins
+- **Level 20:** 5,000 👑 GoldCoins
 - **Level 25:** Community Leader title
-- **Level 30:** 10,000 💎 CyberCoins
-- **Level 35:** 15,000 💎 CyberCoins
-- **Level 40:** 20,000 💎 CyberCoins
-- **Level 45:** 30,000 💎 CyberCoins
-- **Level 50:** 👑 50,000 💎 CyberCoins - KINGDOM LEGEND STATUS!
+- **Level 30:** 10,000 👑 GoldCoins
+- **Level 35:** 15,000 👑 GoldCoins
+- **Level 40:** 20,000 👑 GoldCoins
+- **Level 45:** 30,000 👑 GoldCoins
+- **Level 50:** 👑 50,000 👑 GoldCoins - KINGDOM LEGEND STATUS!
 
 ### Kingdom Level Rewards (Overall)
-- **Level 10:** 2,000 💎 CyberCoins
-- **Level 30:** 10,000 💎 CyberCoins
-- **Level 35:** 15,000 💎 CyberCoins
-- **Level 40:** 25,000 💎 CyberCoins
+- **Level 10:** 2,000 👑 GoldCoins
+- **Level 30:** 10,000 👑 GoldCoins
+- **Level 35:** 15,000 👑 GoldCoins
+- **Level 40:** 25,000 👑 GoldCoins
 - **Level 45:** Server Grandmaster title
-- **Level 50:** 👑 100,000 💎 CyberCoins - ULTIMATE KINGDOM LEGEND STATUS!
+- **Level 50:** 👑 100,000 👑 GoldCoins - ULTIMATE KINGDOM LEGEND STATUS!
 
 ### 🎭 Configurable Role Rewards
 **NEW FEATURE:** Admins can now set custom role rewards for any level!

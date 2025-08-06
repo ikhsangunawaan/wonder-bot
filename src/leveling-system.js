@@ -1,14 +1,14 @@
 const { EmbedBuilder } = require('discord.js');
 const database = require('./database');
 const config = require('../config.json');
-const Y2KDesign = require('./utils/y2k-design');
+const LuxuryDesign = require('./utils/luxury-design');
 
 class LevelingSystem {
     constructor(client) {
         this.client = client;
         this.voiceSessions = new Map(); // Track active voice sessions
         this.xpCooldowns = new Map(); // Text XP cooldowns
-        this.design = new Y2KDesign(); // Y2K Design utility
+        this.design = new LuxuryDesign(); // Luxury Design utility
         
         // XP Configuration
         this.xpConfig = {
@@ -395,19 +395,19 @@ class LevelingSystem {
         const levelIcon = this.design.getLevelTypeIcon(levelType, isMaxLevel);
         const levelBadge = this.design.createLevelBadge(newLevel);
         
-        // Create title with Y2K styling
-        const titlePrefix = isMaxLevel ? 'legend' : (newLevel >= 40 ? 'royal' : (newLevel >= 25 ? 'elite' : null));
+        // Create title with royal styling
+        const titlePrefix = isMaxLevel ? 'legend' : (newLevel >= 40 ? 'royal' : (newLevel >= 25 ? 'luxury' : null));
         const title = isMaxLevel ? 
-            this.design.styleTitle('MAX LEVEL ACHIEVED!', 'legend') : 
-            this.design.styleTitle('LEVEL UP!', titlePrefix);
+            this.design.styleTitle('ROYAL ASCENSION!', 'legend') : 
+            this.design.styleTitle('NOBILITY ACHIEVED!', titlePrefix);
         
-        // Create description with Y2K aesthetic
+        // Create description with royal aesthetic
         const styledUsername = this.design.styleUsername(user.username, newLevel);
         const levelTypeName = levelType === 'overall' ? 'Kingdom' : levelType.charAt(0).toUpperCase() + levelType.slice(1);
         
         const description = isMaxLevel ?
             `${this.design.theme.emojis.crown} **${styledUsername}** has ascended to the ultimate **${levelTypeName} Level ${newLevel}**!\n\n${this.design.theme.emojis.magic} **CONGRATULATIONS! You are now a KINGDOM LEGEND!** ${this.design.theme.emojis.magic}` :
-            `${this.design.theme.emojis.star} **${styledUsername}** has reached **${levelTypeName} ${levelBadge}**!`;
+            `${this.design.theme.emojis.star} **${styledUsername}** has achieved **${levelTypeName} ${levelBadge}**!`;
 
         const embed = this.design.createEmbed(isMaxLevel ? 'kingdom' : 'royal')
             .setTitle(`${levelIcon} ${title}`)
@@ -426,7 +426,7 @@ class LevelingSystem {
             }
             
             embed.addFields([{
-                name: `${this.design.theme.emojis.gem} Royal Reward`,
+                name: `${this.design.theme.emojis.treasure} Royal Treasury Reward`,
                 value: rewardText,
                 inline: false
             }]);
@@ -435,11 +435,11 @@ class LevelingSystem {
         // Add special styling for max level
         if (isMaxLevel) {
             embed.addFields([{
-                name: `${this.design.theme.emojis.crown} Kingdom Status`,
-                value: `${this.design.theme.emojis.magic} **LEGENDARY TIER UNLOCKED** ${this.design.theme.emojis.magic}\n${this.design.createDivider()}\nYou have reached the pinnacle of the Y2K Kingdom!`,
+                name: `${this.design.theme.emojis.crown} Royal Status`,
+                value: `${this.design.theme.emojis.magic} **LEGENDARY NOBILITY UNLOCKED** ${this.design.theme.emojis.magic}\n${this.design.createDivider()}\nYou have reached the pinnacle of the Luxury Kingdom!`,
                 inline: false
             }]);
-            embed.setFooter({ text: `${this.design.theme.emojis.crown} KINGDOM LEGEND ${this.design.theme.emojis.crown} • Ultimate Power Achieved` });
+            embed.setFooter({ text: `${this.design.theme.emojis.crown} KINGDOM LEGEND ${this.design.theme.emojis.crown} • Ultimate Nobility Achieved` });
         } else {
             embed.setFooter({ text: this.design.createFooter() });
         }
@@ -560,15 +560,15 @@ class LevelingSystem {
     // Get Kingdom Status based on level
     getKingdomStatus(maxLevel) {
         if (maxLevel >= this.levelFormula.maxLevel) {
-            return `${this.design.theme.emojis.crown} **KINGDOM LEGEND** ${this.design.createDivider()} Ultimate Power Achieved`;
+            return `${this.design.theme.emojis.crown} **KINGDOM LEGEND** ${this.design.createDivider()} Ultimate Nobility Achieved`;
         } else if (maxLevel >= 40) {
-            return `${this.design.theme.emojis.gem} **ROYAL ELITE** ${this.design.createDivider()} Noble Status Unlocked`;
+            return `${this.design.theme.emojis.diamond} **ROYAL NOBILITY** ${this.design.createDivider()} Noble Court Member`;
         } else if (maxLevel >= 25) {
-            return `${this.design.theme.emojis.star} **CYBER NOBLE** ${this.design.createDivider()} Advanced Citizen`;
+            return `${this.design.theme.emojis.medal} **COURT ARISTOCRAT** ${this.design.createDivider()} High Society Member`;
         } else if (maxLevel >= 10) {
-            return `${this.design.theme.emojis.crystal} **KINGDOM CITIZEN** ${this.design.createDivider()} Rising Member`;
+            return `${this.design.theme.emojis.gem} **KINGDOM COURTIER** ${this.design.createDivider()} Rising Noble`;
         } else {
-            return `${this.design.theme.emojis.magic} **NEW ARRIVAL** ${this.design.createDivider()} Welcome to the Kingdom`;
+            return `${this.design.theme.emojis.magic} **NEW SUBJECT** ${this.design.createDivider()} Welcome to the Kingdom`;
         }
     }
 
