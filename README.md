@@ -1,240 +1,318 @@
-# 🤖 Wonder Discord Bot
+# 🏰 Wonder Discord Bot - Luxury Kingdom Edition
 
-A comprehensive Discord bot featuring economy system, introduction cards, games, role management, and exclusive perks for boosters and premium members.
+A comprehensive Discord bot featuring advanced economy system, interactive games, WonderCoins drop system, introduction cards, role management, and exclusive perks. Built with luxury kingdom aesthetics and premium user experience.
 
-## ✨ Features
+## 📋 Table of Contents
+- [Features Overview](#-features-overview)
+- [Installation & Setup](#-installation--setup)
+- [Commands Reference](#-commands-reference)
+- [System Configuration](#-system-configuration)
+- [Database Schema](#-database-schema)
+- [Development Guide](#-development-guide)
+- [Troubleshooting](#-troubleshooting)
+
+## ✨ Features Overview
 
 ### 💰 Advanced Economy System
-- **WonderCash Currency**: Earn and spend virtual currency
-- **Daily Rewards**: Claim daily WonderCash bonuses (24h cooldown)
-- **Work System**: Work every hour to earn more currency (1h cooldown)
-- **Transaction History**: Track all your earnings and spending
-- **Leaderboard**: Compete with other members
-- **Anti-Spam Protection**: Cooldown system prevents command abuse
+**Core Features:**
+- **WonderCoins Currency**: Virtual currency system with transaction tracking
+- **Daily Rewards**: 100 WonderCoins every 24 hours (boosters +50, premium +100)
+- **Work System**: 50 WonderCoins every hour (boosters +25, premium +50)
+- **Balance Management**: Check, transfer, and track all transactions
+- **Anti-Spam Protection**: Cooldown system prevents abuse
+- **Leaderboard System**: Server-wide wealth competition
 
-### 🎮 Interactive Games
-- **Coin Flip**: Bet on heads or tails (2min cooldown)
-- **Dice Rolling**: Roll dice for various multipliers (3min cooldown)
-- **Slot Machine**: Try your luck with emoji slots (5min cooldown)
-- **Lucky Charm Effect**: Use items to increase win rates
-- **Premium Perks**: Reduced cooldowns for boosters and premium members
+**Role-Based Bonuses:**
+- **Server Boosters**: +50 daily, +25 work bonus
+- **Premium Members**: +100 daily, +50 work bonus
+- **Multiplier Stacking**: Bonuses stack with other systems
 
 ### 🪙 WonderCoins Drop System
-- **Random Drops**: Automated WonderCoins drops every 30 minutes to 3 hours
-- **Rarity System**: Common, Rare (3x), Epic (5x), Legendary (10x) drops
-- **Fun Collection Mechanics**: 
-  - 💰 **Standard Collection**: Normal amount collection
-  - ⚡ **Quick Grab**: First 3 collectors get double coins!
-  - 🍀 **Lucky Grab**: 30% chance for 1.5x bonus coins
-- **Role Multipliers**: Premium (+50%) and Booster (+25%) bonuses
-- **Admin Controls**: Setup drop channels, manual triggers, statistics
-- **Competition Elements**: Server leaderboards and personal statistics
-- **Time-Limited**: 60-second collection window creates excitement
+**Automated Drop Features:**
+- **Random Timing**: Drops occur every 30 minutes to 3 hours globally
+- **Multi-Server Support**: Single system serves all configured servers
+- **Channel-Based**: Admin-configured channels receive drops
 
-### 📝 Introduction Cards
-- **Custom Cards**: Create beautiful introduction cards with your info
-- **Image Generation**: Automatically generated images with Canvas
-- **Form Interface**: Easy-to-use modal forms
-- **Channel Integration**: Auto-post to introduction channels
+**Rarity & Rewards System:**
+| Rarity | Multiplier | Chance | Example Amount |
+|--------|------------|--------|----------------|
+| Common | 1x | ~84% | 150 coins |
+| Rare | 3x | 10% | 450 coins |
+| Epic | 5x | 5% | 750 coins |
+| Legendary | 10x | 1% | 1,500 coins |
+
+**Interactive Collection Mechanics:**
+- **💰 Standard Collection**: Click to collect normal amount
+- **⚡ Quick Grab**: First 3 collectors get 2x coins (competition element)
+- **🍀 Lucky Grab**: 30% chance for 1.5x bonus coins (gambling element)
+
+**Role Multipliers:**
+- **Premium Members**: +50% on all collections
+- **Server Boosters**: +25% on all collections
+- **Stacking**: Works with collection type bonuses
+
+**Time Management:**
+- **Collection Window**: 60 seconds to collect
+- **Auto-Expiry**: Shows collection summary when expired
+- **One Per User**: Prevents duplicate collections
+
+### 🎮 Interactive Games
+**Available Games:**
+- **Coin Flip**: Bet 10-1,000 WonderCoins on heads/tails (2min cooldown)
+- **Dice Rolling**: Bet 10-500 WonderCoins, various multipliers (3min cooldown)
+- **Slot Machine**: Bet 20-200 WonderCoins, emoji-based slots (5min cooldown)
+
+**Game Features:**
+- **Lucky Charm Effects**: Use consumable items to boost win rates
+- **Premium Perks**: Reduced cooldowns for boosters and premium
+- **Fair RNG**: Cryptographically secure random number generation
+- **Betting Limits**: Configurable min/max bets per game
+
+### 📝 Introduction Cards System
+**Card Creation:**
+- **Interactive Forms**: Modal-based form interface
+- **Custom Fields**: Name, age, location, hobbies, favorite color, bio
+- **Image Generation**: Automatically generated cards using Canvas
+- **Profile Integration**: Links to user profiles and avatars
+
+**Visual Features:**
+- **Dynamic Backgrounds**: Color-based backgrounds from favorite color
+- **Typography**: Custom fonts and text styling
+- **Avatar Integration**: User Discord avatar overlay
+- **Responsive Design**: Adapts to different text lengths
 
 ### 🎭 Role Management & Perks
-- **Server Booster Benefits**: Extra rewards for server boosters
-- **Premium Member Perks**: VIP benefits for premium role holders
-- **Exclusive Channels**: Access to booster and premium lounges
-- **Auto Role Assignment**: Automatic role management
+**Automatic Role Benefits:**
+- **Server Booster Detection**: Automatic perk activation
+- **Premium Role Integration**: VIP benefits system
+- **Exclusive Access**: Special channels and features
+- **Status Display**: Visual indicators in all commands
 
-### 🎉 Welcome System
-- **Welcome Messages**: Customizable welcome messages for new members
-- **Introduction Button**: Quick access to create introduction cards
-- **Server Setup**: Admin commands to configure channels
+**Perk System:**
+- **Economy Bonuses**: Enhanced daily/work rewards
+- **Game Benefits**: Reduced cooldowns and better odds
+- **Drop Advantages**: Multiplied collection amounts
+- **Shop Discounts**: Reduced prices on items
 
 ### 🏪 Advanced Shop System
-- **Item Categories**: Consumables, Collectibles, Profile Items, Special Items
-- **Consumable Items**: Boosters, potions, and temporary effects
-- **Collectible Items**: Rare trophies and valuable items
-- **Profile Customization**: Custom titles, colors, and borders
-- **Mystery Boxes**: Random rewards with valuable items
-- **Interactive Shopping**: Browse categories with select menus and buttons
+**Item Categories:**
+- **Consumables**: Temporary effect items (boosters, potions)
+- **Collectibles**: Rare trophies and valuable items
+- **Profile Items**: Custom titles, colors, borders
+- **Special Items**: Unique and event-exclusive items
+
+**Shopping Experience:**
+- **Interactive Interface**: Category menus and item browsers
+- **Detailed Previews**: Item effects and descriptions
+- **Purchase Confirmation**: Clear transaction details
+- **Inventory Management**: Track owned items and quantities
 
 ### 🎉 Advanced Giveaway System
-- **Weighted Entry System**: Different odds for member types
-- **Role-Based Odds**: Regular (1x), Boosters (2x), Premium (3x) entry chances
-- **Winner Restrictions**: Previous winners blocked for 7 days
-- **Premium Bypass**: Premium members can bypass winner restrictions
-- **Auto Winner Selection**: Weighted random selection algorithm
-- **Management Tools**: Start, end, reroll, and view statistics
-- **Interactive Entry**: Click button to enter giveaways
+**Entry Management:**
+- **Weighted Odds**: Regular (1x), Boosters (2x), Premium (3x)
+- **Winner Restrictions**: 7-day cooldown between wins
+- **Account Age**: Minimum requirements for participation
+- **Role Requirements**: Configurable role-based entry
 
-### ⚡ Modern Interface
-- **Slash Commands**: Full slash command support
-- **Prefix Commands**: Traditional `w.` prefix commands
-- **Interactive Buttons**: Click-to-interact features
-- **Beautiful Embeds**: Rich, colorful message embeds
-- **Select Menus**: Easy navigation through shop categories
+**Giveaway Features:**
+- **Flexible Duration**: Minutes to weeks support
+- **Multiple Winners**: Up to 10 winners per giveaway
+- **Auto-Management**: Automatic winner selection and notification
+- **Statistics Tracking**: Detailed analytics per giveaway
 
-## 🚀 Quick Start
+### 🎯 Leveling System
+**XP Categories:**
+- **Text XP**: 15-25 XP per message (1min cooldown)
+- **Voice XP**: 10-15 XP per minute (unmuted required)
+- **Role XP**: Activity-based bonuses (daily login, streaks)
+- **Overall Level**: Combined progress from all categories
+
+**Progression Features:**
+- **Max Level**: 50 in all categories
+- **Role Rewards**: Automatic role assignment at milestones
+- **Currency Rewards**: WonderCoins bonuses at level-ups
+- **Title System**: Custom titles for achievements
+
+### 🔧 Welcome & Setup System
+**Welcome Features:**
+- **Custom Messages**: Personalized welcome text
+- **Introduction Buttons**: Quick access to card creation
+- **Channel Integration**: Automatic posting to designated channels
+- **Member Onboarding**: Streamlined new user experience
+
+**Admin Configuration:**
+- **Channel Setup**: Configure welcome and introduction channels
+- **Message Customization**: Custom welcome message templates
+- **Auto-Role Assignment**: Optional role assignment on join
+- **Logging**: Join/leave event tracking
+
+## 🚀 Installation & Setup
 
 ### Prerequisites
-- Node.js 16.9.0 or higher
-- A Discord bot token
-- Basic knowledge of Discord bot setup
+```bash
+# Required Software
+Node.js >= 18.0.0
+npm >= 8.0.0
+Git
 
-### Installation
+# System Dependencies (Ubuntu/Debian)
+sudo apt-get update
+sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd wonder-discord-bot
-   ```
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/your-username/wonder-discord-bot.git
+cd wonder-discord-bot
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### Step 2: Install Dependencies
+```bash
+npm install
+```
 
-3. **Setup environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` with your bot credentials:
-   ```env
-   DISCORD_TOKEN=your_discord_bot_token_here
-   CLIENT_ID=your_discord_client_id_here
-   GUILD_ID=your_guild_id_here (optional, for development)
-   WELCOME_CHANNEL_ID=welcome_channel_id
-   INTRODUCTION_CHANNEL_ID=introduction_channel_id
-   BOOSTER_ROLE_ID=server_booster_role_id
-   PREMIUM_ROLE_ID=premium_paid_role_id
-   ```
+### Step 3: Environment Configuration
+```bash
+# Copy environment template
+cp .env.example .env
 
-4. **Start the bot**
-   ```bash
-   npm start
-   ```
-   
-   For development:
-   ```bash
-   npm run dev
-   ```
+# Edit environment variables
+nano .env
+```
 
-## 📋 Commands
+**Required Environment Variables:**
+```env
+# Discord Bot Configuration
+DISCORD_TOKEN=your_bot_token_here
+CLIENT_ID=your_bot_client_id
+GUILD_ID=your_test_server_id (optional, for development)
+
+# Role IDs (get from Discord Developer Mode)
+BOOSTER_ROLE_ID=server_booster_role_id
+PREMIUM_ROLE_ID=premium_member_role_id
+
+# Database Configuration (optional)
+DATABASE_PATH=./wonder.db
+
+# Development Settings
+NODE_ENV=production
+DEBUG=false
+```
+
+### Step 4: Deploy Commands
+```bash
+# Deploy slash commands to Discord
+npm run deploy-commands
+```
+
+### Step 5: Start Bot
+```bash
+# Production mode
+npm start
+
+# Development mode (with auto-restart)
+npm run dev
+```
+
+### Step 6: Initial Server Setup
+```bash
+# In Discord, use these commands to configure your server:
+/setup welcome #welcome-channel "Welcome to our server!"
+/setup introduction #introductions
+
+# Setup WonderCoins drops
+/drops setup #general
+/drops setup #bot-commands
+```
+
+## 📚 Commands Reference
 
 ### 💰 Economy Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `w.balance` / `/balance` | Check WonderCash balance | `w.balance [@user]` |
-| `w.daily` / `/daily` | Claim daily reward | `w.daily` |
-| `w.work` / `/work` | Work to earn WonderCash | `w.work` |
-| `w.leaderboard` / `/leaderboard` | View top earners | `w.leaderboard` |
-
-### 🏪 Shop Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `w.shop` | Browse the Wonder Shop | `w.shop` |
-| `w.inventory` / `w.inv` | View your inventory | `w.inventory` |
-| `w.use` | Use consumable items | `w.use daily_booster` |
-
-### 🎉 Giveaway Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `w.gstart` / `/giveaway start` | Start a giveaway (Admin) | `w.gstart 1h 1 100 WonderCash` |
-| `w.gend` / `/giveaway end` | End giveaway early (Admin) | `w.gend 1` |
-| `w.greroll` / `/giveaway reroll` | Reroll winners (Admin) | `w.greroll 1` |
-| `w.glist` / `/giveaway list` | List active giveaways | `w.glist` |
-| `w.gwins` / `/giveaway wins` | View your giveaway wins | `w.gwins` |
-| `/giveaway stats` | View giveaway statistics | `/giveaway stats giveaway_id:1` |
-
-### 🎮 Game Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `w.coinflip` / `/coinflip` | Coin flip betting game | `w.coinflip heads 100` |
-| `w.dice` / `/dice` | Dice rolling game | `w.dice 50` |
-| `w.slots` / `/slots` | Slot machine game | `w.slots 25` |
+| Command | Description | Usage Example | Cooldown |
+|---------|-------------|---------------|----------|
+| `/balance` | Check WonderCoins balance | `/balance @user` | None |
+| `/daily` | Claim daily reward | `/daily` | 24 hours |
+| `/work` | Work for WonderCoins | `/work` | 1 hour |
+| `/leaderboard` | View wealth rankings | `/leaderboard` | None |
+| `/pay` | Transfer coins to user | `/pay @user 100` | None |
+| `/transactions` | View transaction history | `/transactions` | None |
 
 ### 🪙 WonderCoins Drop Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `/drops setup` | Setup drop channels (Admin) | `/drops setup channel:#general` |
-| `/drops remove` | Remove drop channels (Admin) | `/drops remove channel:#general` |
-| `/drops list` | List active drop channels | `/drops list` |
-| `/drops stats` | View server drop statistics | `/drops stats` |
-| `/drops mystats` | View your personal drop stats | `/drops mystats` |
-| `/drops trigger` | Manual drop trigger (Admin) | `/drops trigger channel:#general amount:100 rarity:epic` |
+| Command | Description | Usage Example | Access Level |
+|---------|-------------|---------------|--------------|
+| `/drops setup` | Add drop channel | `/drops setup channel:#general` | Admin |
+| `/drops remove` | Remove drop channel | `/drops remove channel:#general` | Admin |
+| `/drops list` | List active channels | `/drops list` | Everyone |
+| `/drops stats` | Server statistics | `/drops stats` | Everyone |
+| `/drops mystats` | Personal statistics | `/drops mystats` | Everyone |
+| `/drops trigger` | Manual drop | `/drops trigger channel:#general amount:100 rarity:epic` | Admin |
+
+### 🎮 Game Commands
+| Command | Description | Usage Example | Cooldown |
+|---------|-------------|---------------|----------|
+| `/coinflip` | Bet on coin flip | `/coinflip choice:heads amount:100` | 2 minutes |
+| `/dice` | Roll dice game | `/dice amount:50` | 3 minutes |
+| `/slots` | Slot machine | `/slots amount:25` | 5 minutes |
+
+### 🎉 Giveaway Commands
+| Command | Description | Usage Example | Access Level |
+|---------|-------------|---------------|--------------|
+| `/giveaway start` | Create giveaway | `/giveaway start duration:1h winners:1 prize:100 WonderCoins` | Admin |
+| `/giveaway end` | End early | `/giveaway end giveaway_id:1` | Admin |
+| `/giveaway reroll` | Reroll winners | `/giveaway reroll giveaway_id:1` | Admin |
+| `/giveaway list` | List active | `/giveaway list` | Everyone |
+| `/giveaway wins` | Your wins | `/giveaway wins` | Everyone |
+| `/giveaway stats` | Statistics | `/giveaway stats giveaway_id:1` | Everyone |
+
+### 🎯 Leveling Commands
+| Command | Description | Usage Example | Access Level |
+|---------|-------------|---------------|--------------|
+| `/level` | Check levels | `/level @user` | Everyone |
+| `/rank` | Level ranking | `/rank type:overall` | Everyone |
+| `/rewards` | Level rewards | `/rewards` | Everyone |
+| `/give-xp` | Give XP | `/give-xp @user type:text amount:100` | Admin |
+| `/reset-level` | Reset levels | `/reset-level @user type:text` | Admin |
+| `/level-role` | Configure role rewards | `/level-role add type:text level:10 role:@Member` | Admin |
 
 ### 📝 Introduction Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `/intro create` | Create introduction card | `/intro create` |
-| `/intro view` | View introduction cards | `/intro view [@user]` |
+| Command | Description | Usage Example | Access Level |
+|---------|-------------|---------------|--------------|
+| `/intro create` | Create card | `/intro create` | Everyone |
+| `/intro view` | View cards | `/intro view @user` | Everyone |
 
-### 💎 Role Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `w.perks` | View your role perks | `w.perks` |
+### 🏪 Shop Commands
+| Command | Description | Usage Example | Access Level |
+|---------|-------------|---------------|--------------|
+| `/shop` | Browse shop | `/shop` | Everyone |
+| `/inventory` | View items | `/inventory` | Everyone |
+| `/use` | Use item | `/use item:lucky_charm` | Everyone |
 
 ### ⚙️ Admin Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `/setup welcome` | Setup welcome system | `/setup welcome #channel [message]` |
-| `/setup introduction` | Setup intro channel | `/setup introduction #channel` |
+| Command | Description | Usage Example | Required Permission |
+|---------|-------------|---------------|-------------------|
+| `/setup welcome` | Welcome config | `/setup welcome channel:#welcome message:Welcome!` | Administrator |
+| `/setup introduction` | Intro config | `/setup introduction channel:#intros` | Administrator |
+| `/give` | Give currency | `/give @user 1000` | Administrator |
+| `/take` | Take currency | `/take @user 500` | Administrator |
+| `/reset` | Reset user data | `/reset @user` | Administrator |
 
-### ℹ️ Utility Commands
-| Command | Description | Usage |
-|---------|-------------|-------|
-| `w.help` / `/help` | Show all commands | `w.help` |
+## ⚙️ System Configuration
 
-## 💎 Role Perks
-
-### 🚀 Server Booster Benefits
-- **+50** WonderCash daily bonus
-- **+25** WonderCash work bonus
-- Access to exclusive #booster-lounge
-- Special recognition in community
-- Auto-role assignment on boost
-
-### ⭐ Premium Member Benefits
-- **+100** WonderCash daily bonus
-- **+50** WonderCash work bonus
-- Access to exclusive #premium-lounge
-- Custom embed colors
-- Priority support
-- VIP treatment
-- **50% reduced** game cooldowns
-- **15% discount** on shop items
-- **3x giveaway entry odds**
-- **Bypass winner restrictions** on giveaways
-
-## ⏰ Cooldown System
-
-To prevent spam and maintain balance, commands have cooldowns:
-
-### 💰 Economy Cooldowns
-- **Daily Reward**: 24 hours
-- **Work Command**: 1 hour (can be bypassed with ⚡ Work Energy item)
-- **Item Usage**: 1 minute between uses
-
-### 🎮 Game Cooldowns
-- **Coin Flip**: 2 minutes
-- **Dice Roll**: 3 minutes  
-- **Slot Machine**: 5 minutes
-- **Mystery Box**: 30 minutes
-
-### 🎁 Cooldown Reduction Perks
-- **Server Boosters**: 25% reduction on game cooldowns
-- **Premium Members**: 50% reduction on game cooldowns
-- **Work Energy Item**: Temporarily removes work cooldown
-
-## 🛠️ Configuration
-
-### Bot Settings (`config.json`)
+### Bot Configuration (config.json)
 ```json
 {
   "prefix": "w.",
   "currency": {
-    "name": "WonderCash",
+    "name": "WonderCoins",
     "symbol": "💰",
     "dailyAmount": 100,
     "workAmount": 50
+  },
+  "branding": {
+    "name": "Luxury Kingdom Bot",
+    "tagline": "Royal Elegance Awaits",
+    "version": "2.0.0",
+    "theme": "Luxury Kingdom Aesthetic"
   },
   "booster": {
     "dailyBonus": 50,
@@ -246,146 +324,420 @@ To prevent spam and maintain balance, commands have cooldowns:
     "workBonus": 50,
     "exclusiveChannels": true,
     "customColor": true
+  },
+  "games": {
+    "coinflip": { "minBet": 10, "maxBet": 1000 },
+    "dice": { "minBet": 10, "maxBet": 500 },
+    "slots": { "minBet": 20, "maxBet": 200 }
+  },
+  "cooldowns": {
+    "daily": 1440,
+    "work": 60,
+    "coinflip": 2,
+    "dice": 3,
+    "slots": 5,
+    "mystery_box": 30,
+    "use_item": 1
   }
 }
 ```
 
-### Game Settings
-- **Coin Flip**: Bet 10-1000 WonderCash
-- **Dice**: Bet 10-500 WonderCash
-- **Slots**: Bet 20-200 WonderCash
+### WonderCoins Drop Configuration
+```javascript
+// Default configuration in wondercoins-drop-system.js
+config: {
+  minAmount: 10,           // Minimum drop amount
+  maxAmount: 500,          // Maximum drop amount
+  minInterval: 1800000,    // 30 minutes in milliseconds
+  maxInterval: 10800000,   // 3 hours in milliseconds
+  collectTime: 60000,      // 60 seconds to collect
+  
+  // Rarity probabilities and multipliers
+  rareDrop: { chance: 0.1, multiplier: 3 },      // 10%
+  epicDrop: { chance: 0.05, multiplier: 5 },     // 5%
+  legendaryDrop: { chance: 0.01, multiplier: 10 } // 1%
+}
+```
 
-### WonderCoins Drop Mechanics
-- **Drop Amount**: 10-500 WonderCoins base amount
-- **Drop Timing**: Random intervals between 30 minutes to 3 hours
-- **Collection Time**: 60 seconds to collect after drop appears
-- **Rarity Chances**:
-  - Common: Base amount (most frequent)
-  - Rare: 3x multiplier (10% chance)
-  - Epic: 5x multiplier (5% chance)
-  - Legendary: 10x multiplier (1% chance)
-- **Collection Types**:
-  - Standard: Normal amount
-  - Quick Grab: 2x coins for first 3 collectors
-  - Lucky Grab: 30% chance for 1.5x bonus
-- **Role Bonuses**: Premium (+50%), Booster (+25%)
+### Color Scheme
+```json
+"colors": {
+  "primary": "#FFD700",    // Gold
+  "secondary": "#DAA520",  // Dark gold
+  "accent": "#8B4513",     // Saddle brown
+  "success": "#228B22",    // Forest green
+  "error": "#DC143C",      // Crimson
+  "warning": "#FF8C00",    // Dark orange
+  "info": "#4169E1",       // Royal blue
+  "royal": "#800080",      // Purple
+  "luxury": "#FF69B4",     // Hot pink
+  "kingdom": "#FFD700",    // Gold
+  "background": "#2F1B69", // Dark purple
+  "text": "#F5F5DC"        // Beige
+}
+```
+
+## 🗄️ Database Schema
+
+### Core Tables
+```sql
+-- User economy and profile data
+CREATE TABLE users (
+  user_id TEXT PRIMARY KEY,
+  username TEXT,
+  balance INTEGER DEFAULT 0,
+  daily_last_claimed TEXT,
+  work_last_used TEXT,
+  total_earned INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Transaction history
+CREATE TABLE transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT,
+  type TEXT,                    -- 'daily', 'work', 'game_win', 'drop', etc.
+  amount INTEGER,
+  description TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Introduction cards
+CREATE TABLE introduction_cards (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT UNIQUE,
+  name TEXT,
+  age INTEGER,
+  location TEXT,
+  hobbies TEXT,
+  favorite_color TEXT,
+  bio TEXT,
+  image_url TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Server configuration
+CREATE TABLE server_settings (
+  guild_id TEXT PRIMARY KEY,
+  welcome_channel TEXT,
+  introduction_channel TEXT,
+  welcome_message TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### WonderCoins Drop System Tables
+```sql
+-- Drop channel configuration
+CREATE TABLE drop_channels (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  guild_id TEXT,
+  channel_id TEXT,
+  created_by TEXT,              -- Admin who added the channel
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(guild_id, channel_id)
+);
+
+-- Detailed drop statistics
+CREATE TABLE drop_stats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  guild_id TEXT,
+  user_id TEXT,
+  amount INTEGER,               -- Amount collected
+  rarity TEXT,                  -- 'common', 'rare', 'epic', 'legendary'
+  collection_type TEXT,         -- 'collect', 'quick', 'lucky'
+  drop_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User drop statistics summary
+CREATE TABLE user_drop_stats (
+  user_id TEXT PRIMARY KEY,
+  total_collected INTEGER DEFAULT 0,
+  total_drops INTEGER DEFAULT 0,
+  common_drops INTEGER DEFAULT 0,
+  rare_drops INTEGER DEFAULT 0,
+  epic_drops INTEGER DEFAULT 0,
+  legendary_drops INTEGER DEFAULT 0,
+  last_drop DATETIME,
+  best_drop INTEGER DEFAULT 0
+);
+```
+
+### Shop & Inventory Tables
+```sql
+-- User inventory
+CREATE TABLE user_inventory (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT,
+  item_id TEXT,
+  quantity INTEGER DEFAULT 1,
+  acquired_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Active consumable effects
+CREATE TABLE active_effects (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT,
+  effect_type TEXT,             -- 'lucky_charm', 'xp_boost', etc.
+  duration_minutes INTEGER,
+  uses_remaining INTEGER DEFAULT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  expires_at DATETIME
+);
+```
+
+### Leveling System Tables
+```sql
+-- User leveling data
+CREATE TABLE user_levels (
+  user_id TEXT PRIMARY KEY,
+  text_level INTEGER DEFAULT 1,
+  text_xp INTEGER DEFAULT 0,
+  voice_level INTEGER DEFAULT 1,
+  voice_xp INTEGER DEFAULT 0,
+  role_level INTEGER DEFAULT 1,
+  role_xp INTEGER DEFAULT 0,
+  overall_level INTEGER DEFAULT 1,
+  total_xp INTEGER DEFAULT 0,
+  last_text_xp DATETIME,
+  voice_session_start DATETIME,
+  last_daily_login DATETIME,
+  message_streak INTEGER DEFAULT 0,
+  voice_streak INTEGER DEFAULT 0
+);
+
+-- Level role rewards configuration
+CREATE TABLE level_role_config (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  level_type TEXT,              -- 'text', 'voice', 'role', 'overall'
+  level INTEGER,
+  role_id TEXT,
+  role_name TEXT,
+  created_by TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(level_type, level)
+);
+```
+
+### Giveaway System Tables
+```sql
+-- Giveaway data
+CREATE TABLE giveaways (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  guild_id TEXT,
+  channel_id TEXT,
+  message_id TEXT,
+  host_id TEXT,
+  prize TEXT,
+  winner_count INTEGER,
+  end_time DATETIME,
+  ended BOOLEAN DEFAULT FALSE,
+  requirements TEXT,            -- JSON string
+  winners TEXT,                 -- JSON array
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Giveaway entries
+CREATE TABLE giveaway_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  giveaway_id INTEGER,
+  user_id TEXT,
+  weight REAL,                  -- Entry weight based on roles
+  entered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (giveaway_id) REFERENCES giveaways(id)
+);
+```
 
 ## 📁 Project Structure
 
 ```
 wonder-discord-bot/
 ├── src/
-│   ├── index.js                    # Main bot file
-│   ├── database.js                 # SQLite database management
-│   ├── slash-commands.js           # Slash command definitions
-│   ├── slash-handlers.js           # Slash command handlers
-│   ├── role-manager.js             # Role and perks management
-│   ├── wondercoins-drop-system.js  # WonderCoins drop system
+│   ├── index.js                      # Main bot entry point
+│   ├── database.js                   # SQLite database management
+│   ├── slash-commands.js             # Slash command definitions
+│   ├── slash-handlers.js             # Command handler implementations
+│   ├── role-manager.js               # Role and perks management
+│   ├── shop-system.js                # Shop and inventory system
+│   ├── cooldown-manager.js           # Cooldown and effects management
+│   ├── giveaway-system.js            # Giveaway management
+│   ├── leveling-system.js            # XP and leveling system
+│   ├── wondercoins-drop-system.js    # WonderCoins drop system
 │   └── utils/
-│       └── canvas.js               # Image generation utilities
-├── config.json               # Bot configuration
-├── package.json              # Dependencies and scripts
-├── .env.example             # Environment variables template
-└── README.md                # This file
+│       ├── canvas.js                 # Image generation utilities
+│       └── luxury-design.js          # UI design components
+├── config.json                       # Bot configuration settings
+├── package.json                      # Node.js dependencies
+├── deploy-commands.js                # Command deployment script
+├── .env.example                      # Environment variables template
+├── .gitignore                        # Git ignore rules
+├── README.md                         # This documentation
+├── LEVELING_SYSTEM.md               # Detailed leveling guide
+└── Y2K_KINGDOM_DESIGN.md            # Design system documentation
 ```
 
-## 🗄️ Database Schema
-
-The bot uses SQLite with the following tables:
-- `users` - User economy data
-- `introduction_cards` - Introduction card information
-- `server_settings` - Per-server configuration
-- `transactions` - Transaction history
-- `drop_channels` - WonderCoins drop channel configuration
-- `drop_stats` - Detailed drop collection statistics
-- `user_drop_stats` - Personal drop statistics summary
-
-## 🎨 Customization
-
-### Colors
-The bot uses a consistent color scheme defined in `config.json`:
-- **Primary**: #7C3AED (Purple)
-- **Success**: #10B981 (Green)
-- **Error**: #EF4444 (Red)
-- **Warning**: #F59E0B (Amber)
-- **Info**: #3B82F6 (Blue)
-
-### Introduction Cards
-- Canvas-based image generation
-- Customizable backgrounds based on favorite color
-- User avatar integration
-- Responsive text wrapping
-
-## 🔧 Development
+## 🛠️ Development Guide
 
 ### Adding New Commands
-1. Add command to `loadCommands()` in `src/index.js`
-2. For slash commands, add to `src/slash-commands.js`
-3. Add handler to `src/slash-handlers.js`
+1. **Define Command Structure** (src/slash-commands.js):
+```javascript
+new SlashCommandBuilder()
+    .setName('newcommand')
+    .setDescription('Command description')
+    .addStringOption(option =>
+        option.setName('parameter')
+            .setDescription('Parameter description')
+            .setRequired(true))
+```
 
-### Database Changes
-1. Modify schema in `database.js`
-2. Add new methods as needed
-3. Test with development database
+2. **Implement Handler** (src/slash-handlers.js):
+```javascript
+async handleNewCommand(interaction) {
+    const parameter = interaction.options.getString('parameter');
+    // Implementation logic
+    await interaction.reply({ content: 'Response' });
+}
+```
 
-### Adding Game Features
-1. Create game logic in command handler
-2. Add betting validation
-3. Update transaction system
-4. Test thoroughly
+3. **Register Handler** (src/index.js):
+```javascript
+case 'newcommand':
+    await this.slashHandlers.handleNewCommand(interaction);
+    break;
+```
 
-## 🐛 Troubleshooting
+### Database Operations
+```javascript
+// Create new database method
+async createNewTable() {
+    this.db.run(`
+        CREATE TABLE IF NOT EXISTS new_table (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+}
+
+// Add to database.js init() method
+```
+
+### Error Handling
+```javascript
+try {
+    // Database operations
+    await database.someOperation();
+    await interaction.reply({ content: '✅ Success' });
+} catch (error) {
+    console.error('Error in command:', error);
+    await interaction.reply({ 
+        content: '❌ An error occurred. Please try again.', 
+        ephemeral: true 
+    });
+}
+```
+
+### Testing
+```bash
+# Run tests
+npm test
+
+# Check for syntax errors
+npm run lint
+
+# Development with hot reload
+npm run dev
+```
+
+## 🔧 Troubleshooting
 
 ### Common Issues
 
-**Bot not responding to commands:**
-- Check if bot has correct permissions
-- Verify DISCORD_TOKEN is valid
-- Ensure bot is in the server
+**1. Canvas Installation Errors**
+```bash
+# Ubuntu/Debian
+sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
 
-**Slash commands not appearing:**
-- Check CLIENT_ID is correct
-- Verify bot has application commands permission
-- Try restarting the bot
+# CentOS/RHEL
+sudo yum groupinstall "Development Tools"
+sudo yum install cairo-devel pango-devel libjpeg-turbo-devel giflib-devel
+```
 
-**Database errors:**
-- Ensure write permissions in bot directory
-- Check SQLite installation
-- Verify database file isn't corrupted
+**2. Database Permission Errors**
+```bash
+# Fix database permissions
+chmod 755 wonder.db
+chown $USER:$USER wonder.db
+```
 
-**Canvas/Image generation errors:**
-- Install canvas dependencies for your system
-- Check if user avatars are accessible
-- Verify file write permissions
+**3. Command Deployment Issues**
+```bash
+# Clear and redeploy commands
+rm -f deploy-commands.log
+npm run deploy-commands
+
+# Check bot permissions in Discord
+# Ensure bot has "applications.commands" scope
+```
+
+**4. Role Detection Problems**
+```bash
+# Enable Developer Mode in Discord
+# Right-click roles → Copy ID
+# Update .env with correct role IDs
+```
+
+### Debug Mode
+```env
+# Add to .env file
+DEBUG=true
+NODE_ENV=development
+
+# Enables verbose logging
+# Shows detailed error messages
+# Logs all database operations
+```
+
+### Log Analysis
+```bash
+# View recent logs
+tail -f bot.log
+
+# Search for errors
+grep -i error bot.log
+
+# Monitor database operations
+grep -i "database" bot.log
+```
+
+### Performance Monitoring
+```javascript
+// Add to index.js for monitoring
+setInterval(() => {
+    const memUsage = process.memoryUsage();
+    console.log(`Memory usage: ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`);
+}, 300000); // Every 5 minutes
+```
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See LICENSE file for details.
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-## 💬 Support
+## 📞 Support
 
-For support, questions, or feature requests:
-- Create an issue on GitHub
-- Join our Discord server
-- Check the documentation
-
-## 📈 Roadmap
-
-- [ ] Web dashboard for server management
-- [ ] More interactive games
-- [ ] Custom role creation system
-- [ ] Integration with external APIs
-- [ ] Mobile-friendly introduction cards
-- [ ] Advanced economy features (shops, items)
+- **Documentation**: Check this README and system docs
+- **Issues**: Report bugs via GitHub Issues
+- **Discord**: Join our support server [invite link]
+- **Email**: support@wonderbot.com
 
 ---
 
-**Wonder Bot** - Making Discord communities amazing! ✨
+**Built with ❤️ for the Discord community**
