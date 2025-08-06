@@ -196,6 +196,20 @@ class Database {
                 xp_earned INTEGER DEFAULT 0
             )
         `);
+
+        // Level role rewards configuration table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS level_role_config (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                level_type TEXT,
+                level INTEGER,
+                role_id TEXT,
+                role_name TEXT,
+                created_by TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(level_type, level)
+            )
+        `);
     }
 
     // User economy methods
@@ -1017,6 +1031,70 @@ class Database {
                 (err, row) => {
                     if (err) reject(err);
                     resolve(row);
+                }
+            );
+        });
+    }
+
+    // ================== LEVEL ROLE CONFIGURATION METHODS ==================
+
+    // Set role reward for specific level and type
+    async setLevelRoleReward(levelType, level, roleId, roleName, createdBy) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT OR REPLACE INTO level_role_config (level_type, level, role_id, role_name, created_by) VALUES (?, ?, ?, ?, ?)',
+                [levelType, level, roleId, roleName, createdBy],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    // Get role reward for specific level and type
+    async getLevelRoleReward(levelType, level) {
+        return new Promise((resolve, reject) => {
+            this.db.get(
+                'SELECT * FROM level_role_config WHERE level_type = ? AND level = ?',
+                [levelType, level],
+                (err, row) => {
+                    if (err) reject(err);
+                    resolve(row);
+                }
+            );
+        });
+    }
+
+    // Get all role rewards for a level type
+    async getAllLevelRoleRewards(levelType = null) {
+        return new Promise((resolve, reject) => {
+            let query = 'SELECT * FROM level_role_config';
+            let params = [];
+            
+            if (levelType) {
+                query += ' WHERE level_type = ?';
+                params.push(levelType);
+            }
+            
+            query += ' ORDER BY level_type, level';
+            
+            this.db.all(query, params, (err, rows) => {
+                if (err) reject(err);
+                resolve(rows || []);
+            });
+        });
+    }
+
+    // Remove role reward for specific level and type
+    async removeLevelRoleReward(levelType, level) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'DELETE FROM level_role_config WHERE level_type = ? AND level = ?',
+                [levelType, level],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
                 }
             );
         });

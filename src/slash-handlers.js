@@ -400,7 +400,7 @@ class SlashHandlers {
                 },
                 {
                     name: '⚙️ Admin Commands',
-                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel',
+                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel\n`/give-xp` - Give XP to users\n`/reset-level` - Reset user levels\n`/level-role set` - Set role rewards for levels\n`/level-role remove` - Remove role rewards\n`/level-role list` - List all role rewards',
                     inline: false
                 },
                 {
@@ -861,6 +861,160 @@ class SlashHandlers {
         } catch (error) {
             console.error('Error resetting levels:', error);
             await interaction.reply({ content: '❌ Failed to reset levels!', ephemeral: true });
+        }
+    }
+
+    async handleLevelRole(interaction) {
+        try {
+            // Check permissions
+            if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+                await interaction.reply({ content: '❌ You need Administrator permissions to use this command!', ephemeral: true });
+                return;
+            }
+
+            const subcommand = interaction.options.getSubcommand();
+
+            switch (subcommand) {
+                case 'set':
+                    await this.handleLevelRoleSet(interaction);
+                    break;
+                case 'remove':
+                    await this.handleLevelRoleRemove(interaction);
+                    break;
+                case 'list':
+                    await this.handleLevelRoleList(interaction);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error handling level role command:', error);
+            await interaction.reply({ content: '❌ Failed to execute command!', ephemeral: true });
+        }
+    }
+
+    async handleLevelRoleSet(interaction) {
+        const levelType = interaction.options.getString('level_type');
+        const level = interaction.options.getInteger('level');
+        const role = interaction.options.getRole('role');
+
+        try {
+            // Check if role exists
+            if (!role) {
+                await interaction.reply({ content: '❌ Invalid role specified!', ephemeral: true });
+                return;
+            }
+
+            // Set the role reward
+            await database.setLevelRoleReward(levelType, level, role.id, role.name, interaction.user.id);
+
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.success)
+                .setTitle('✅ Role Reward Set!')
+                .setDescription(`Successfully set **${role.name}** as reward for **${levelType.charAt(0).toUpperCase() + levelType.slice(1)} Level ${level}**!`)
+                .addFields([
+                    {
+                        name: '📊 Details',
+                        value: `**Level Type:** ${levelType.charAt(0).toUpperCase() + levelType.slice(1)}\n**Level:** ${level}\n**Role:** ${role}\n**Set by:** ${interaction.user}`,
+                        inline: false
+                    }
+                ])
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error setting level role reward:', error);
+            await interaction.reply({ content: '❌ Failed to set role reward!', ephemeral: true });
+        }
+    }
+
+    async handleLevelRoleRemove(interaction) {
+        const levelType = interaction.options.getString('level_type');
+        const level = interaction.options.getInteger('level');
+
+        try {
+            // Check if reward exists
+            const existingReward = await database.getLevelRoleReward(levelType, level);
+            if (!existingReward) {
+                await interaction.reply({ content: `❌ No role reward found for ${levelType} level ${level}!`, ephemeral: true });
+                return;
+            }
+
+            // Remove the role reward
+            await database.removeLevelRoleReward(levelType, level);
+
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.warning)
+                .setTitle('🗑️ Role Reward Removed!')
+                .setDescription(`Successfully removed role reward for **${levelType.charAt(0).toUpperCase() + levelType.slice(1)} Level ${level}**!`)
+                .addFields([
+                    {
+                        name: '📊 Removed Details',
+                        value: `**Level Type:** ${levelType.charAt(0).toUpperCase() + levelType.slice(1)}\n**Level:** ${level}\n**Role:** ${existingReward.role_name}\n**Removed by:** ${interaction.user}`,
+                        inline: false
+                    }
+                ])
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error removing level role reward:', error);
+            await interaction.reply({ content: '❌ Failed to remove role reward!', ephemeral: true });
+        }
+    }
+
+    async handleLevelRoleList(interaction) {
+        const levelType = interaction.options.getString('level_type');
+
+        try {
+            const roleRewards = await database.getAllLevelRoleRewards(levelType);
+
+            if (roleRewards.length === 0) {
+                const message = levelType ? 
+                    `No role rewards configured for ${levelType} levels!` : 
+                    'No role rewards configured yet!';
+                await interaction.reply({ content: `📝 ${message}`, ephemeral: true });
+                return;
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.primary)
+                .setTitle('🏆 Level Role Rewards Configuration')
+                .setDescription(levelType ? 
+                    `Role rewards for **${levelType.charAt(0).toUpperCase() + levelType.slice(1)}** levels:` : 
+                    'All configured role rewards:')
+                .setTimestamp();
+
+            // Group by level type
+            const groupedRewards = {};
+            roleRewards.forEach(reward => {
+                if (!groupedRewards[reward.level_type]) {
+                    groupedRewards[reward.level_type] = [];
+                }
+                groupedRewards[reward.level_type].push(reward);
+            });
+
+            // Add fields for each level type
+            Object.entries(groupedRewards).forEach(([type, rewards]) => {
+                const typeEmoji = type === 'text' ? '💬' : type === 'voice' ? '🎤' : type === 'role' ? '⭐' : '🏆';
+                const rewardsList = rewards
+                    .sort((a, b) => a.level - b.level)
+                    .map(r => `Level ${r.level}: **${r.role_name}**`)
+                    .join('\n');
+
+                embed.addFields([{
+                    name: `${typeEmoji} ${type.charAt(0).toUpperCase() + type.slice(1)} Levels`,
+                    value: rewardsList || 'No rewards configured',
+                    inline: true
+                }]);
+            });
+
+            if (roleRewards.length > 20) {
+                embed.setFooter({ text: `Showing ${Math.min(20, roleRewards.length)} of ${roleRewards.length} rewards` });
+            }
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error listing level role rewards:', error);
+            await interaction.reply({ content: '❌ Failed to list role rewards!', ephemeral: true });
         }
     }
 }

@@ -164,6 +164,9 @@ class WonderBot {
                     case 'reset-level':
                         await this.slashHandlers.handleResetLevel(interaction);
                         break;
+                    case 'level-role':
+                        await this.slashHandlers.handleLevelRole(interaction);
+                        break;
                 }
             } catch (error) {
                 console.error('Error executing slash command:', error);

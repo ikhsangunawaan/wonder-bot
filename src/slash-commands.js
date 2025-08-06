@@ -240,7 +240,69 @@ const commands = [
                     { name: 'Text', value: 'text' },
                     { name: 'Voice', value: 'voice' },
                     { name: 'Role', value: 'role' }
-                ))
+                )),
+
+    new SlashCommandBuilder()
+        .setName('level-role')
+        .setDescription('Manage level role rewards (Admin only)')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('set')
+                .setDescription('Set a role reward for a specific level')
+                .addStringOption(option =>
+                    option.setName('level_type')
+                        .setDescription('Type of level')
+                        .setRequired(true)
+                        .addChoices(
+                            { name: 'Text', value: 'text' },
+                            { name: 'Voice', value: 'voice' },
+                            { name: 'Role', value: 'role' },
+                            { name: 'Overall', value: 'overall' }
+                        ))
+                .addIntegerOption(option =>
+                    option.setName('level')
+                        .setDescription('Level number (1-50)')
+                        .setRequired(true)
+                        .setMinValue(1)
+                        .setMaxValue(50))
+                .addRoleOption(option =>
+                    option.setName('role')
+                        .setDescription('Role to give as reward')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('remove')
+                .setDescription('Remove a role reward for a specific level')
+                .addStringOption(option =>
+                    option.setName('level_type')
+                        .setDescription('Type of level')
+                        .setRequired(true)
+                        .addChoices(
+                            { name: 'Text', value: 'text' },
+                            { name: 'Voice', value: 'voice' },
+                            { name: 'Role', value: 'role' },
+                            { name: 'Overall', value: 'overall' }
+                        ))
+                .addIntegerOption(option =>
+                    option.setName('level')
+                        .setDescription('Level number (1-50)')
+                        .setRequired(true)
+                        .setMinValue(1)
+                        .setMaxValue(50)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List all configured role rewards')
+                .addStringOption(option =>
+                    option.setName('level_type')
+                        .setDescription('Filter by level type (optional)')
+                        .setRequired(false)
+                        .addChoices(
+                            { name: 'Text', value: 'text' },
+                            { name: 'Voice', value: 'voice' },
+                            { name: 'Role', value: 'role' },
+                            { name: 'Overall', value: 'overall' }
+                        )))
 ];
 
 async function deployCommands() {

@@ -37,12 +37,12 @@ class LevelingSystem {
             maxLevel: 50
         };
 
-        // Level rewards configuration
+        // Level rewards configuration (currency and titles only, roles are configurable)
         this.levelRewards = {
             text: {
                 5: { type: 'currency', amount: 500, message: 'Chatty Beginner Bonus!' },
                 10: { type: 'currency', amount: 1000, message: 'Active Chatter Reward!' },
-                15: { type: 'role', roleId: process.env.ACTIVE_ROLE_ID, message: 'You earned the Active Member role!' },
+                // Role rewards are now configurable via database
                 20: { type: 'currency', amount: 2000, message: 'Text Master Bonus!' },
                 25: { type: 'title', title: 'Text Master', message: 'You can now use the Text Master title!' },
                 30: { type: 'currency', amount: 5000, message: 'Legendary Chatter Reward!' },
@@ -54,7 +54,7 @@ class LevelingSystem {
             voice: {
                 5: { type: 'currency', amount: 750, message: 'Voice Newbie Bonus!' },
                 10: { type: 'currency', amount: 1500, message: 'Social Speaker Reward!' },
-                15: { type: 'role', roleId: process.env.SOCIAL_ROLE_ID, message: 'You earned the Social Member role!' },
+                // Role rewards are now configurable via database
                 20: { type: 'currency', amount: 3000, message: 'Voice Champion Bonus!' },
                 25: { type: 'title', title: 'Voice Champion', message: 'You can now use the Voice Champion title!' },
                 30: { type: 'currency', amount: 7500, message: 'Voice Legend Reward!' },
@@ -66,7 +66,7 @@ class LevelingSystem {
             role: {
                 5: { type: 'currency', amount: 1000, message: 'Community Helper Bonus!' },
                 10: { type: 'currency', amount: 2500, message: 'Server Contributor Reward!' },
-                15: { type: 'role', roleId: process.env.HELPFUL_ROLE_ID, message: 'You earned the Helpful Member role!' },
+                // Role rewards are now configurable via database
                 20: { type: 'currency', amount: 5000, message: 'Community Leader Bonus!' },
                 25: { type: 'title', title: 'Community Leader', message: 'You can now use the Community Leader title!' },
                 30: { type: 'currency', amount: 10000, message: 'Server Legend Reward!' },
@@ -77,7 +77,7 @@ class LevelingSystem {
             },
             overall: {
                 10: { type: 'currency', amount: 2000, message: 'Rising Star Bonus!' },
-                25: { type: 'role', roleId: process.env.VETERAN_ROLE_ID, message: 'You earned the Veteran role!' },
+                // Role rewards are now configurable via database
                 30: { type: 'currency', amount: 10000, message: 'Server Veteran Reward!' },
                 35: { type: 'currency', amount: 15000, message: 'Elite Member Bonus!' },
                 40: { type: 'currency', amount: 25000, message: 'Supreme Member Reward!' },
@@ -308,11 +308,27 @@ class LevelingSystem {
         // Update overall level
         await this.updateOverallLevel(userId);
 
-        // Check for rewards
+        // Check for hardcoded rewards (currency and titles)
         const rewards = this.levelRewards[levelType];
         if (rewards && rewards[cappedLevel]) {
             const reward = rewards[cappedLevel];
             await this.grantReward(userId, levelType, cappedLevel, reward);
+        }
+
+        // Check for configurable role rewards
+        try {
+            const roleReward = await database.getLevelRoleReward(levelType, cappedLevel);
+            if (roleReward) {
+                const roleRewardData = {
+                    type: 'role',
+                    roleId: roleReward.role_id,
+                    roleName: roleReward.role_name,
+                    message: `You earned the ${roleReward.role_name} role!`
+                };
+                await this.grantReward(userId, levelType, cappedLevel, roleRewardData);
+            }
+        } catch (error) {
+            console.error('Error checking role rewards:', error);
         }
 
         // Send level up message
@@ -469,6 +485,40 @@ class LevelingSystem {
                 value: `${hours}h ${minutes}m total`,
                 inline: true
             }]);
+        }
+
+        // Add configured role rewards info
+        try {
+            const allRoleRewards = await database.getAllLevelRoleRewards();
+            if (allRoleRewards.length > 0) {
+                let roleRewardsText = '';
+                const userRewards = allRoleRewards.filter(reward => {
+                    const userLevel = levelData[reward.level_type === 'overall' ? 'overall_level' : `${reward.level_type}_level`];
+                    return userLevel >= reward.level;
+                });
+
+                const upcomingRewards = allRoleRewards.filter(reward => {
+                    const userLevel = levelData[reward.level_type === 'overall' ? 'overall_level' : `${reward.level_type}_level`];
+                    return userLevel < reward.level;
+                }).slice(0, 3); // Show next 3 upcoming rewards
+
+                if (upcomingRewards.length > 0) {
+                    roleRewardsText = upcomingRewards.map(reward => {
+                        const typeEmoji = reward.level_type === 'text' ? '💬' : 
+                                        reward.level_type === 'voice' ? '🎤' : 
+                                        reward.level_type === 'role' ? '⭐' : '🏆';
+                        return `${typeEmoji} Level ${reward.level}: **${reward.role_name}**`;
+                    }).join('\n');
+
+                    embed.addFields([{
+                        name: '🎁 Upcoming Role Rewards',
+                        value: roleRewardsText,
+                        inline: false
+                    }]);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching role rewards for embed:', error);
         }
 
         return embed;
