@@ -317,6 +317,7 @@ class SlashHandlers {
                 {
                     name: `${this.design.theme.emojis.treasure} Economy Commands`,
                     value: '`/balance` - Check WonderCoins treasury\n`/daily` - Claim royal daily reward\n`/work` - Work for the kingdom\n`/leaderboard` - View top earners',
+cursor/tambahkan-fitur-leveling-roles-dan-level-d928
                     inline: false
                 },
                 {
@@ -345,6 +346,36 @@ class SlashHandlers {
                     inline: false
                 },
                 {
+
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.diamond} Game Commands`,
+                    value: '`/coinflip` - Royal coin flip game\n`/dice` - Royal dice rolling\n`/slots` - Palace slot machine',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.royal} Introduction Commands`,
+                    value: '`/intro create` - Create royal introduction card\n`/intro view` - View noble profiles',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.crown} Leveling Commands`,
+                    value: '`/level` - Check your royal levels and XP\n`/rank` - View nobility leaderboards\n`/rewards` - Claim level rewards\n`/give-xp` - Give XP (Admin)\n`/reset-level` - Reset levels (Admin)',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.star} Giveaway Commands`,
+                    value: '`/giveaway start` - Start royal giveaway (Admin)\n`/giveaway list` - List active giveaways\n`/giveaway wins` - View your victories',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.scepter} Admin Commands`,
+                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel\n`/level-role set` - Set role rewards for levels\n`/level-role remove` - Remove role rewards\n`/level-role list` - List all role rewards',
+                    inline: false
+                },
+                {
+ main
                     name: `${this.design.theme.emojis.magic} Exclusive Perks`,
                     value: '**Server Boosters:** +50 daily, +25 work bonus, **1.5x XP**, **2x giveaway odds**\n**Premium Members:** +100 daily, +50 work bonus, **1.75x XP**, **3x giveaway odds**, **bypass winner restrictions**',
                     inline: false
@@ -360,6 +391,7 @@ class SlashHandlers {
 
         await interaction.reply({ embeds: [embed] });
     }
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
 
     async handleDrops(interaction) {
         const subcommand = interaction.options.getSubcommand();
@@ -652,6 +684,8 @@ class SlashHandlers {
             });
         }
     }
+
+main
 }
 
 module.exports = SlashHandlers;

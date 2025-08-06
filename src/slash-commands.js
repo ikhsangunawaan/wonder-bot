@@ -302,6 +302,7 @@ const commands = [
                             { name: 'Voice', value: 'voice' },
                             { name: 'Role', value: 'role' },
                             { name: 'Overall', value: 'overall' }
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
                         ))),
 
     new SlashCommandBuilder()
@@ -358,6 +359,8 @@ const commands = [
                             { name: 'Rare', value: 'rare' },
                             { name: 'Epic', value: 'epic' },
                             { name: 'Legendary', value: 'legendary' }
+
+ main
                         )))
 ];
 

@@ -210,6 +210,7 @@ class Database {
                 UNIQUE(level_type, level)
             )
         `);
+ cursor/tambahkan-fitur-leveling-roles-dan-level-d928
 
         // WonderCoins drop channels table
         this.db.run(`
@@ -250,6 +251,8 @@ class Database {
                 best_drop INTEGER DEFAULT 0
             )
         `);
+
+ main
     }
 
     // User economy methods
