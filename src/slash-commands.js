@@ -172,7 +172,137 @@ const commands = [
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User to check wins for')
-                        .setRequired(false)))
+                        .setRequired(false))),
+
+    // Leveling Commands
+    new SlashCommandBuilder()
+        .setName('level')
+        .setDescription('Check your or someone else\'s level information')
+        .addUserOption(option =>
+            option.setName('user')
+                .setDescription('User to check levels for')
+                .setRequired(false)),
+
+    new SlashCommandBuilder()
+        .setName('rank')
+        .setDescription('View leveling leaderboards')
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Type of leaderboard to view')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'Overall', value: 'overall' },
+                    { name: 'Text', value: 'text' },
+                    { name: 'Voice', value: 'voice' },
+                    { name: 'Role', value: 'role' }
+                )),
+
+    new SlashCommandBuilder()
+        .setName('rewards')
+        .setDescription('View and claim your unclaimed level rewards'),
+
+    new SlashCommandBuilder()
+        .setName('give-xp')
+        .setDescription('Give XP to a user (Admin only)')
+        .addUserOption(option =>
+            option.setName('user')
+                .setDescription('User to give XP to')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Type of XP to give')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Text', value: 'text' },
+                    { name: 'Voice', value: 'voice' },
+                    { name: 'Role', value: 'role' }
+                ))
+        .addIntegerOption(option =>
+            option.setName('amount')
+                .setDescription('Amount of XP to give')
+                .setRequired(true)
+                .setMinValue(1)
+                .setMaxValue(10000)),
+
+    new SlashCommandBuilder()
+        .setName('reset-level')
+        .setDescription('Reset a user\'s levels (Admin only)')
+        .addUserOption(option =>
+            option.setName('user')
+                .setDescription('User to reset levels for')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Type of level to reset')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'All', value: 'all' },
+                    { name: 'Text', value: 'text' },
+                    { name: 'Voice', value: 'voice' },
+                    { name: 'Role', value: 'role' }
+                )),
+
+    new SlashCommandBuilder()
+        .setName('level-role')
+        .setDescription('Manage level role rewards (Admin only)')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('set')
+                .setDescription('Set a role reward for a specific level')
+                .addStringOption(option =>
+                    option.setName('level_type')
+                        .setDescription('Type of level')
+                        .setRequired(true)
+                        .addChoices(
+                            { name: 'Text', value: 'text' },
+                            { name: 'Voice', value: 'voice' },
+                            { name: 'Role', value: 'role' },
+                            { name: 'Overall', value: 'overall' }
+                        ))
+                .addIntegerOption(option =>
+                    option.setName('level')
+                        .setDescription('Level number (1-50)')
+                        .setRequired(true)
+                        .setMinValue(1)
+                        .setMaxValue(50))
+                .addRoleOption(option =>
+                    option.setName('role')
+                        .setDescription('Role to give as reward')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('remove')
+                .setDescription('Remove a role reward for a specific level')
+                .addStringOption(option =>
+                    option.setName('level_type')
+                        .setDescription('Type of level')
+                        .setRequired(true)
+                        .addChoices(
+                            { name: 'Text', value: 'text' },
+                            { name: 'Voice', value: 'voice' },
+                            { name: 'Role', value: 'role' },
+                            { name: 'Overall', value: 'overall' }
+                        ))
+                .addIntegerOption(option =>
+                    option.setName('level')
+                        .setDescription('Level number (1-50)')
+                        .setRequired(true)
+                        .setMinValue(1)
+                        .setMaxValue(50)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List all configured role rewards')
+                .addStringOption(option =>
+                    option.setName('level_type')
+                        .setDescription('Filter by level type (optional)')
+                        .setRequired(false)
+                        .addChoices(
+                            { name: 'Text', value: 'text' },
+                            { name: 'Voice', value: 'voice' },
+                            { name: 'Role', value: 'role' },
+                            { name: 'Overall', value: 'overall' }
+                        )))
 ];
 
 async function deployCommands() {

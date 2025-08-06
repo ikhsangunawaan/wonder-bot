@@ -1,10 +1,16 @@
 {
   "prefix": "w.",
   "currency": {
-    "name": "WonderCash",
+    "name": "WonderCoins",
     "symbol": "💰",
     "dailyAmount": 100,
     "workAmount": 50
+  },
+  "branding": {
+    "name": "Luxury Kingdom Bot",
+    "tagline": "Royal Elegance Awaits",
+    "version": "2.0.0",
+    "theme": "Luxury Kingdom Aesthetic"
   },
   "booster": {
     "dailyBonus": 50,
@@ -32,11 +38,46 @@
     }
   },
   "colors": {
-    "primary": "#7C3AED",
-    "success": "#10B981",
-    "error": "#EF4444",
-    "warning": "#F59E0B",
-    "info": "#3B82F6"
+    "primary": "#FFD700",
+    "secondary": "#DAA520", 
+    "accent": "#8B4513",
+    "success": "#228B22",
+    "error": "#DC143C",
+    "warning": "#FF8C00",
+    "info": "#4169E1",
+    "royal": "#800080",
+    "luxury": "#FF69B4",
+    "kingdom": "#FFD700",
+    "background": "#2F1B69",
+    "text": "#F5F5DC"
+  },
+  "theme": {
+    "name": "Luxury Kingdom",
+    "style": "royal-luxury",
+    "emojis": {
+      "crown": "👑",
+      "gem": "💎",
+      "star": "⭐",
+      "castle": "🏰",
+      "kingdom": "🏛️",
+      "royal": "🎭",
+      "diamond": "💍",
+      "magic": "✨",
+      "throne": "🪑",
+      "scepter": "🔱",
+      "treasure": "💰",
+      "medal": "🏅",
+      "ribbon": "🎀",
+      "pearl": "🦪"
+    },
+    "prefixes": {
+      "royal": "『ROYAL』",
+      "luxury": "『LUXURY』", 
+      "kingdom": "『KINGDOM』",
+      "legend": "『LEGEND』",
+      "elite": "『NOBLE』",
+      "majestic": "『MAJESTIC』"
+    }
   },
   "cooldowns": {
     "daily": 1440,
@@ -67,6 +108,54 @@
     "restrictions": {
       "premiumBypass": true,
       "accountAgeMin": 7
+    }
+  },
+  "leveling": {
+    "enabled": true,
+    "maxLevel": 50,
+    "xp": {
+      "text": {
+        "base": 15,
+        "bonus": 5,
+        "cooldown": 60000,
+        "maxPerMessage": 25,
+        "multipliers": {
+          "booster": 1.5,
+          "premium": 1.75
+        }
+      },
+      "voice": {
+        "base": 10,
+        "bonus": 5,
+        "minDuration": 60000,
+        "requiresUnmuted": true,
+        "multipliers": {
+          "booster": 1.5,
+          "premium": 1.75
+        }
+      },
+      "role": {
+        "dailyLogin": 50,
+        "messageStreak": 25,
+        "voiceStreak": 30,
+        "helpingOthers": 100,
+        "eventParticipation": 200,
+        "multipliers": {
+          "booster": 1.25,
+          "premium": 1.5
+        }
+      }
+    },
+    "rewards": {
+      "announceInChannel": true,
+      "dmUser": false,
+      "currencyRewards": true,
+      "roleRewards": true,
+      "titleRewards": true
+    },
+    "leaderboard": {
+      "maxDisplayed": 15,
+      "updateInterval": 300000
     }
   }
 }

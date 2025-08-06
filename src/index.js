@@ -10,6 +10,7 @@ const RoleManager = require('./role-manager');
 const ShopSystem = require('./shop-system');
 const CooldownManager = require('./cooldown-manager');
 const GiveawaySystem = require('./giveaway-system');
+const LevelingSystem = require('./leveling-system');
 
 // Load environment variables
 require('dotenv').config();
@@ -34,6 +35,7 @@ class WonderBot {
         this.shopSystem = new ShopSystem();
         this.cooldownManager = new CooldownManager();
         this.giveawaySystem = new GiveawaySystem(this.client);
+        this.levelingSystem = new LevelingSystem(this.client);
         
         this.setupEventHandlers();
         this.loadCommands();
@@ -42,8 +44,8 @@ class WonderBot {
 
     setupEventHandlers() {
         this.client.once(Events.ClientReady, async () => {
-            console.log(`✅ Wonder Bot is ready! Logged in as ${this.client.user.tag}`);
-            this.client.user.setActivity('w.help | Managing WonderCash 💰', { type: 'WATCHING' });
+            console.log(`✅ Luxury Kingdom Bot is ready! Logged in as ${this.client.user.tag}`);
+            this.client.user.setActivity('w.help | Luxury Kingdom 🏰 WonderCoins 💰', { type: 'WATCHING' });
             
             // Deploy slash commands
             await deployCommands();
@@ -58,10 +60,31 @@ class WonderBot {
         this.client.on(Events.InteractionCreate, this.handleInteraction.bind(this));
         this.client.on(Events.GuildMemberAdd, this.handleMemberJoin.bind(this));
         this.client.on(Events.GuildMemberUpdate, this.handleMemberUpdate.bind(this));
+        this.client.on(Events.VoiceStateUpdate, this.handleVoiceStateUpdate.bind(this));
+        
+        // Start periodic cleanup and voice session updates
+        setInterval(() => {
+            this.cooldownManager.cleanupExpiredEffects();
+            this.levelingSystem.updateActiveVoiceSessions();
+        }, 60 * 1000); // Every minute
     }
 
     async handleMessage(message) {
-        if (message.author.bot || !message.content.startsWith(config.prefix)) return;
+        if (message.author.bot) return;
+
+        // Handle leveling XP for non-command messages
+        if (!message.content.startsWith(config.prefix) && config.leveling?.enabled) {
+            try {
+                await database.createUser(message.author.id, message.author.username);
+                await this.levelingSystem.addTextXP(message.author.id, message);
+            } catch (error) {
+                console.error('Error adding text XP:', error);
+            }
+            return;
+        }
+
+        // Handle commands
+        if (!message.content.startsWith(config.prefix)) return;
 
         const args = message.content.slice(config.prefix.length).trim().split(/ +/);
         const commandName = args.shift().toLowerCase();
@@ -122,6 +145,27 @@ class WonderBot {
                         // Pass bot instance for giveaway system access
                         interaction.bot = this;
                         await this.slashHandlers.handleGiveaway(interaction);
+                        break;
+                    case 'level':
+                        interaction.client.bot = this;
+                        await this.slashHandlers.handleLevel(interaction);
+                        break;
+                    case 'rank':
+                        interaction.client.bot = this;
+                        await this.slashHandlers.handleRank(interaction);
+                        break;
+                    case 'rewards':
+                        await this.slashHandlers.handleRewards(interaction);
+                        break;
+                    case 'give-xp':
+                        interaction.client.bot = this;
+                        await this.slashHandlers.handleGiveXP(interaction);
+                        break;
+                    case 'reset-level':
+                        await this.slashHandlers.handleResetLevel(interaction);
+                        break;
+                    case 'level-role':
+                        await this.slashHandlers.handleLevelRole(interaction);
                         break;
                 }
             } catch (error) {
@@ -1066,6 +1110,34 @@ class WonderBot {
 
     addCommand(name, command) {
         this.commands.set(name, command);
+    }
+
+    // Handle voice state updates for leveling
+    async handleVoiceStateUpdate(oldState, newState) {
+        if (!config.leveling?.enabled) return;
+        
+        const userId = newState.member.id;
+        
+        try {
+            // User joined a voice channel
+            if (!oldState.channel && newState.channel) {
+                await database.createUser(userId, newState.member.user.username);
+                await this.levelingSystem.startVoiceSession(userId, newState.channel.id);
+            }
+            
+            // User left a voice channel
+            if (oldState.channel && !newState.channel) {
+                await this.levelingSystem.endVoiceSession(userId);
+            }
+            
+            // User moved between voice channels
+            if (oldState.channel && newState.channel && oldState.channel.id !== newState.channel.id) {
+                await this.levelingSystem.endVoiceSession(userId);
+                await this.levelingSystem.startVoiceSession(userId, newState.channel.id);
+            }
+        } catch (error) {
+            console.error('Error handling voice state update:', error);
+        }
     }
 
     // Parse duration string (e.g., "1h", "30m", "2d") to minutes

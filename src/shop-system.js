@@ -150,14 +150,102 @@ class ShopSystem {
                     emoji: '📦'
                 },
                 {
-                    id: 'lottery_ticket',
-                    name: '🎫 Lottery Ticket',
-                    description: 'Chance to win the weekly jackpot!',
-                    price: 100,
-                    type: 'special',
+                    id: 'xp_booster',
+                    name: '⚡ XP Booster',
+                    description: 'Double XP gain for 1 hour (All types)',
+                    price: 2500,
+                    type: 'consumable',
                     category: 'special',
-                    effect: 'lottery',
-                    emoji: '🎫'
+                    effect: 'xp_boost',
+                    duration: 60,
+                    emoji: '⚡',
+                    levelRequirement: {
+                        overall: 5
+                    }
+                },
+                {
+                    id: 'premium_xp_booster',
+                    name: '🌟 Premium XP Booster',
+                    description: 'Triple XP gain for 2 hours (All types)',
+                    price: 5000,
+                    type: 'consumable',
+                    category: 'special',
+                    effect: 'premium_xp_boost',
+                    duration: 120,
+                    emoji: '🌟',
+                    levelRequirement: {
+                        overall: 15
+                    }
+                },
+                {
+                    id: 'voice_magnet',
+                    name: '🎤 Voice Magnet',
+                    description: 'Gain extra voice XP when others join your channel for 1 hour',
+                    price: 1800,
+                    type: 'consumable',
+                    category: 'special',
+                    effect: 'voice_magnet',
+                    duration: 60,
+                    emoji: '🎤',
+                    levelRequirement: {
+                        voice: 10
+                    }
+                },
+                {
+                    id: 'chat_streak',
+                    name: '💬 Chat Streak',
+                    description: 'No text XP cooldown for 30 minutes',
+                    price: 1500,
+                    type: 'consumable',
+                    category: 'special',
+                    effect: 'chat_streak',
+                    duration: 30,
+                    emoji: '💬',
+                    levelRequirement: {
+                        text: 8
+                    }
+                },
+                {
+                    id: 'legend_badge',
+                    name: '🏆 Legend Badge',
+                    description: 'Exclusive badge for reaching max level in any category',
+                    price: 25000,
+                    type: 'collectible',
+                    category: 'special',
+                    effect: 'legend_badge',
+                    emoji: '🏆',
+                    levelRequirement: {
+                        overall: 50
+                    }
+                },
+                {
+                    id: 'ultimate_booster',
+                    name: '🌟 Ultimate XP Booster',
+                    description: 'Quintuple XP gain for 3 hours (Max level exclusive)',
+                    price: 50000,
+                    type: 'consumable',
+                    category: 'special',
+                    effect: 'ultimate_xp_boost',
+                    duration: 180,
+                    emoji: '🌟',
+                    levelRequirement: {
+                        overall: 45
+                    }
+                },
+                {
+                    id: 'master_title',
+                    name: '👑 Master Title',
+                    description: 'Exclusive title for reaching level 40+ in all categories',
+                    price: 75000,
+                    type: 'collectible',
+                    category: 'special',
+                    effect: 'master_title',
+                    emoji: '👑',
+                    levelRequirement: {
+                        text: 40,
+                        voice: 40,
+                        role: 40
+                    }
                 }
             ]
         };
@@ -277,9 +365,20 @@ class ShopSystem {
             const rarityEmoji = item.rarity === 'legendary' ? '⭐' : 
                               item.rarity === 'rare' ? '🌟' : '✨';
             
+            let description = item.description;
+            if (item.levelRequirement) {
+                const requirements = Object.entries(item.levelRequirement)
+                    .map(([type, level]) => {
+                        const typeDisplay = type === 'overall' ? 'Overall' : type.charAt(0).toUpperCase() + type.slice(1);
+                        return `${typeDisplay} Lv.${level}`;
+                    })
+                    .join(', ');
+                description += `\n**Requires:** ${requirements}`;
+            }
+            
             embed.addFields({
                 name: `${item.emoji} ${item.name} ${item.rarity ? rarityEmoji : ''}`,
-                value: `${item.description}\n**Price:** ${item.price} ${config.currency.symbol}`,
+                value: `${description}\n**Price:** ${item.price} ${config.currency.symbol}`,
                 inline: true
             });
         });
@@ -344,6 +443,21 @@ class ShopSystem {
             });
         }
 
+        if (item.levelRequirement) {
+            const requirements = Object.entries(item.levelRequirement)
+                .map(([type, level]) => {
+                    const typeDisplay = type === 'overall' ? 'Overall' : type.charAt(0).toUpperCase() + type.slice(1);
+                    return `${typeDisplay} Level ${level}`;
+                })
+                .join('\n');
+            
+            embed.addFields({
+                name: '🔒 Level Requirements',
+                value: requirements,
+                inline: true
+            });
+        }
+
         if (item.effect) {
             const effectDescriptions = {
                 daily_double: 'Doubles your next daily reward',
@@ -397,6 +511,26 @@ class ShopSystem {
                 success: false, 
                 message: `Insufficient funds! You need ${item.price} ${config.currency.symbol} but only have ${user?.balance || 0} ${config.currency.symbol}.` 
             };
+        }
+
+        // Check level requirements
+        if (item.levelRequirement) {
+            try {
+                const userLevels = await database.getUserLevels(userId);
+                for (const [levelType, requiredLevel] of Object.entries(item.levelRequirement)) {
+                    const userLevel = userLevels[`${levelType}_level`] || userLevels[levelType === 'overall' ? 'overall_level' : `${levelType}_level`];
+                    if (userLevel < requiredLevel) {
+                        const levelTypeDisplay = levelType === 'overall' ? 'Overall' : levelType.charAt(0).toUpperCase() + levelType.slice(1);
+                        return {
+                            success: false,
+                            message: `❌ Level requirement not met! You need **${levelTypeDisplay} Level ${requiredLevel}** but you're only **Level ${userLevel}**.`
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking level requirements:', error);
+                return { success: false, message: 'Error checking level requirements!' };
+            }
         }
 
         try {

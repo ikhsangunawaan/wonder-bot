@@ -2,10 +2,12 @@ const { EmbedBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discor
 const database = require('./database');
 const config = require('../config.json');
 const CanvasUtils = require('./utils/canvas');
+const LuxuryDesign = require('./utils/luxury-design');
 
 class SlashHandlers {
     constructor() {
         this.canvas = new CanvasUtils();
+        this.design = new LuxuryDesign();
     }
 
     async handleBalance(interaction) {
@@ -13,20 +15,47 @@ class SlashHandlers {
         const user = await database.getUser(targetUser.id);
         
         if (!user) {
-            await database.createUser(targetUser.id, targetUser.username);
-            const newUser = await database.getUser(targetUser.id);
-            user = newUser;
+            await interaction.reply('❌ User not found in the system!');
+            return;
         }
 
-        const embed = new EmbedBuilder()
-            .setColor(config.colors.primary)
-            .setTitle(`💰 ${targetUser.username}'s Wallet`)
-            .setDescription(`**Balance:** ${user.balance} ${config.currency.symbol} ${config.currency.name}`)
-            .setThumbnail(targetUser.displayAvatarURL())
-            .setFooter({ text: 'Wonder Bot Economy' })
-            .setTimestamp();
+        // Get user level data for status display
+        const levelData = await database.getUserLevels(targetUser.id);
+        const maxLevel = Math.max(levelData.text_level, levelData.voice_level, levelData.role_level, levelData.overall_level);
+        
+        // Create styled elements
+        const styledUsername = this.design.styleUsername(targetUser.username, maxLevel);
+        const balanceAmount = this.design.styleRewardMessage(user.balance, config.currency.symbol);
+        const titlePrefix = maxLevel >= 40 ? 'royal' : (maxLevel >= 25 ? 'elite' : 'cyber');
+        const title = this.design.styleTitle(`${styledUsername}'s Treasury`, titlePrefix);
+        
+        const embed = this.design.createEmbed('royal')
+            .setTitle(`${this.design.theme.emojis.gem} ${title}`)
+            .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 256 }))
+            .addFields([
+                {
+                    name: `${this.design.theme.emojis.magic} Current Balance`,
+                    value: balanceAmount,
+                    inline: true
+                },
+                {
+                    name: `${this.design.theme.emojis.royal} Kingdom Status`,
+                    value: this.getKingdomStatusSlim(maxLevel),
+                    inline: true
+                }
+            ])
+            .setFooter({ text: this.design.createFooter() });
 
         await interaction.reply({ embeds: [embed] });
+    }
+
+    // Helper method for slim kingdom status
+    getKingdomStatusSlim(maxLevel) {
+        if (maxLevel >= 50) return `${this.design.theme.emojis.crown} LEGEND`;
+        if (maxLevel >= 40) return `${this.design.theme.emojis.diamond} ROYAL NOBILITY`;
+        if (maxLevel >= 25) return `${this.design.theme.emojis.medal} COURT ARISTOCRAT`;
+        if (maxLevel >= 10) return `${this.design.theme.emojis.gem} COURTIER`;
+        return `${this.design.theme.emojis.magic} NEW SUBJECT`;
     }
 
     async handleDaily(interaction) {
@@ -56,6 +85,16 @@ class SlashHandlers {
         await database.updateBalance(interaction.user.id, amount);
         await database.updateDailyClaim(interaction.user.id);
         await database.addTransaction(interaction.user.id, 'daily', amount, 'Daily reward claimed');
+
+        // Add role XP for daily login
+        const bot = interaction.client.bot || interaction.client;
+        if (bot.levelingSystem && config.leveling?.enabled) {
+            try {
+                await bot.levelingSystem.addRoleXP(interaction.user.id, 'daily_login');
+            } catch (error) {
+                console.error('Error adding role XP for daily:', error);
+            }
+        }
 
         const embed = new EmbedBuilder()
             .setColor(config.colors.success)
@@ -103,6 +142,18 @@ class SlashHandlers {
         await database.updateBalance(interaction.user.id, amount);
         await database.updateWorkClaim(interaction.user.id);
         await database.addTransaction(interaction.user.id, 'work', amount, `Worked: ${randomJob}`);
+
+        // Add role XP for work activity
+        const bot = interaction.client.bot || interaction.client;
+        if (bot.levelingSystem && config.leveling?.enabled) {
+            try {
+                // Use a custom amount based on work earnings
+                const xpAmount = Math.floor(amount / 2); // XP = half of earnings
+                await bot.levelingSystem.addRoleXP(interaction.user.id, 'custom', xpAmount);
+            } catch (error) {
+                console.error('Error adding role XP for work:', error);
+            }
+        }
 
         const embed = new EmbedBuilder()
             .setColor(config.colors.success)
@@ -258,359 +309,56 @@ class SlashHandlers {
         await interaction.reply({ embeds: [embed] });
     }
 
-    async handleIntro(interaction) {
-        const subcommand = interaction.options.getSubcommand();
-
-        if (subcommand === 'create') {
-            // This will be handled by the modal in the main bot file
-            await interaction.bot.showIntroductionModal(interaction);
-        } else if (subcommand === 'view') {
-            const targetUser = interaction.options.getUser('user') || interaction.user;
-            const cardData = await database.getIntroCard(targetUser.id);
-
-            if (!cardData) {
-                return await interaction.reply(`❌ ${targetUser.username} hasn't created an introduction card yet!`);
-            }
-
-            try {
-                const cardBuffer = await this.canvas.createIntroductionCard(targetUser, cardData);
-                const attachment = new AttachmentBuilder(cardBuffer, { name: 'introduction.png' });
-
-                const embed = new EmbedBuilder()
-                    .setColor(cardData.favorite_color || config.colors.primary)
-                    .setTitle(`📝 ${cardData.name}'s Introduction Card`)
-                    .setImage('attachment://introduction.png')
-                    .setFooter({ text: 'Wonder Bot', iconURL: interaction.client.user.displayAvatarURL() })
-                    .setTimestamp();
-
-                await interaction.reply({ embeds: [embed], files: [attachment] });
-            } catch (error) {
-                console.error('Error creating introduction card:', error);
-                await interaction.reply({ content: '❌ There was an error displaying the introduction card!', ephemeral: true });
-            }
-        }
-    }
-
-    async handleSetup(interaction) {
-        // Check if user has admin permissions
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-            return await interaction.reply({ content: '❌ You need Administrator permissions to use this command!', ephemeral: true });
-        }
-
-        const subcommand = interaction.options.getSubcommand();
-
-        if (subcommand === 'welcome') {
-            const channel = interaction.options.getChannel('channel');
-            const message = interaction.options.getString('message') || 'Welcome to our amazing server!';
-
-            try {
-                await database.updateServerSettings(interaction.guild.id, {
-                    welcomeChannel: channel.id,
-                    welcomeMessage: message
-                });
-
-                const embed = new EmbedBuilder()
-                    .setColor(config.colors.success)
-                    .setTitle('✅ Welcome Settings Updated!')
-                    .setDescription(`**Welcome Channel:** ${channel}\n**Welcome Message:** ${message}`)
-                    .setTimestamp();
-
-                await interaction.reply({ embeds: [embed] });
-            } catch (error) {
-                console.error('Error updating welcome settings:', error);
-                await interaction.reply({ content: '❌ There was an error updating the welcome settings!', ephemeral: true });
-            }
-        } else if (subcommand === 'introduction') {
-            const channel = interaction.options.getChannel('channel');
-
-            try {
-                const settings = await database.getServerSettings(interaction.guild.id);
-                await database.updateServerSettings(interaction.guild.id, {
-                    welcomeChannel: settings?.welcome_channel,
-                    introductionChannel: channel.id,
-                    welcomeMessage: settings?.welcome_message
-                });
-
-                const embed = new EmbedBuilder()
-                    .setColor(config.colors.success)
-                    .setTitle('✅ Introduction Channel Updated!')
-                    .setDescription(`**Introduction Channel:** ${channel}`)
-                    .setTimestamp();
-
-                await interaction.reply({ embeds: [embed] });
-            } catch (error) {
-                console.error('Error updating introduction settings:', error);
-                await interaction.reply({ content: '❌ There was an error updating the introduction settings!', ephemeral: true });
-            }
-        }
-    }
-
     async handleHelp(interaction) {
-        const embed = new EmbedBuilder()
-            .setColor(config.colors.primary)
-            .setTitle('🤖 Wonder Bot Commands')
-            .setDescription('Here are all the available commands:')
+        const embed = this.design.createEmbed('royal')
+            .setTitle(`${this.design.theme.emojis.kingdom} ${this.design.styleTitle('Luxury Kingdom Commands', 'royal')}`)
+            .setDescription(`${this.design.theme.emojis.magic} **Welcome to the Luxury Kingdom!** ${this.design.theme.emojis.magic}\n${this.design.createDivider()}\nHere are all available commands to rule your royal empire:`)
             .addFields(
                 {
-                    name: '💰 Economy Commands',
-                    value: '`/balance` - Check WonderCash balance\n`/daily` - Claim daily reward\n`/work` - Work for WonderCash\n`/leaderboard` - View top earners',
+                    name: `${this.design.theme.emojis.treasure} Economy Commands`,
+                    value: '`/balance` - Check WonderCoins treasury\n`/daily` - Claim royal daily reward\n`/work` - Work for the kingdom\n`/leaderboard` - View top earners',
                     inline: false
                 },
                 {
-                    name: '🎮 Game Commands',
-                    value: '`/coinflip` - Coin flip game\n`/dice` - Dice rolling game\n`/slots` - Slot machine',
+                    name: `${this.design.theme.emojis.diamond} Game Commands`,
+                    value: '`/coinflip` - Royal coin flip game\n`/dice` - Royal dice rolling\n`/slots` - Palace slot machine',
                     inline: false
                 },
                 {
-                    name: '📝 Introduction Commands',
-                    value: '`/intro create` - Create introduction card\n`/intro view` - View introduction cards',
+                    name: `${this.design.theme.emojis.royal} Introduction Commands`,
+                    value: '`/intro create` - Create royal introduction card\n`/intro view` - View noble profiles',
                     inline: false
                 },
                 {
-                    name: '🎉 Giveaway Commands',
-                    value: '`/giveaway start` - Start giveaway (Admin)\n`/giveaway list` - List active giveaways\n`/giveaway wins` - View your wins',
+                    name: `${this.design.theme.emojis.crown} Leveling Commands`,
+                    value: '`/level` - Check your royal levels and XP\n`/rank` - View nobility leaderboards\n`/rewards` - Claim level rewards\n`/give-xp` - Give XP (Admin)\n`/reset-level` - Reset levels (Admin)',
                     inline: false
                 },
                 {
-                    name: '⚙️ Admin Commands',
-                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel',
+                    name: `${this.design.theme.emojis.star} Giveaway Commands`,
+                    value: '`/giveaway start` - Start royal giveaway (Admin)\n`/giveaway list` - List active giveaways\n`/giveaway wins` - View your victories',
                     inline: false
                 },
                 {
-                    name: '💎 Exclusive Perks',
-                    value: '**Server Boosters:** +50 daily, +25 work bonus, **2x giveaway odds**\n**Premium Members:** +100 daily, +50 work bonus, **3x giveaway odds**, **bypass winner restrictions**',
+                    name: `${this.design.theme.emojis.scepter} Admin Commands`,
+                    value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel\n`/level-role set` - Set role rewards for levels\n`/level-role remove` - Remove role rewards\n`/level-role list` - List all role rewards',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.magic} Exclusive Perks`,
+                    value: '**Server Boosters:** +50 daily, +25 work bonus, **1.5x XP**, **2x giveaway odds**\n**Premium Members:** +100 daily, +50 work bonus, **1.75x XP**, **3x giveaway odds**, **bypass winner restrictions**',
+                    inline: false
+                },
+                {
+                    name: `${this.design.theme.emojis.kingdom} Royal Leveling System`,
+                    value: '**Text Level:** Gain XP by chatting (15-25 XP per message)\n**Voice Level:** Gain XP in voice channels (10-15 XP per minute, only when unmuted)\n**Role Level:** Gain XP through daily activities and achievements\n**Kingdom Level:** Combined progress from all categories\n\n**🏆 MAX LEVEL: 50 for all categories!**',
                     inline: false
                 }
             )
-            .setFooter({ text: 'Wonder Bot - Making Discord communities amazing!' })
+            .setFooter({ text: this.design.createFooter('Luxury Kingdom Bot • Royal Elegance Awaits') })
             .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
-    }
-
-    async handleGiveaway(interaction) {
-        const subcommand = interaction.options.getSubcommand();
-
-        switch (subcommand) {
-            case 'start':
-                await this.handleGiveawayStart(interaction);
-                break;
-            case 'end':
-                await this.handleGiveawayEnd(interaction);
-                break;
-            case 'reroll':
-                await this.handleGiveawayReroll(interaction);
-                break;
-            case 'list':
-                await this.handleGiveawayList(interaction);
-                break;
-            case 'stats':
-                await this.handleGiveawayStats(interaction);
-                break;
-            case 'wins':
-                await this.handleGiveawayWins(interaction);
-                break;
-        }
-    }
-
-    async handleGiveawayStart(interaction) {
-        if (!interaction.member.permissions.has('MANAGE_GUILD')) {
-            return await interaction.reply({ 
-                content: '❌ You need **Manage Server** permissions to create giveaways!', 
-                ephemeral: true 
-            });
-        }
-
-        const duration = interaction.options.getString('duration');
-        const winners = interaction.options.getInteger('winners');
-        const prize = interaction.options.getString('prize');
-        const title = interaction.options.getString('title') || 'Giveaway';
-        const channel = interaction.options.getChannel('channel') || interaction.channel;
-        const restrictWinners = interaction.options.getBoolean('restrict_winners') ?? true;
-
-        // Parse duration
-        const durationMinutes = interaction.bot.parseDuration(duration);
-        if (!durationMinutes) {
-            return await interaction.reply({ 
-                content: '❌ Invalid duration! Use format like: 1h, 30m, 2d, etc.', 
-                ephemeral: true 
-            });
-        }
-
-        try {
-            const giveaway = await interaction.bot.giveawaySystem.createGiveaway(interaction.guild, channel.id, {
-                title: title,
-                description: `Win **${prize}**!`,
-                prize: prize,
-                winnerCount: winners,
-                duration: durationMinutes,
-                createdBy: interaction.user.id,
-                restrictWinners: restrictWinners
-            });
-
-            const embed = interaction.bot.giveawaySystem.createGiveawayEmbed(giveaway);
-            const button = interaction.bot.giveawaySystem.createGiveawayButton(giveaway.id);
-
-            const giveawayMessage = await channel.send({
-                content: '🎉 **GIVEAWAY** 🎉',
-                embeds: [embed],
-                components: [button]
-            });
-
-            await database.updateGiveawayMessageId(giveaway.id, giveawayMessage.id);
-
-            await interaction.reply({ 
-                content: `✅ Giveaway created successfully in ${channel}!`, 
-                ephemeral: true 
-            });
-
-        } catch (error) {
-            console.error('Error creating giveaway:', error);
-            await interaction.reply({ 
-                content: '❌ Failed to create giveaway!', 
-                ephemeral: true 
-            });
-        }
-    }
-
-    async handleGiveawayEnd(interaction) {
-        if (!interaction.member.permissions.has('MANAGE_GUILD')) {
-            return await interaction.reply({ 
-                content: '❌ You need **Manage Server** permissions to end giveaways!', 
-                ephemeral: true 
-            });
-        }
-
-        const giveawayId = interaction.options.getInteger('giveaway_id');
-
-        try {
-            await interaction.bot.giveawaySystem.endGiveaway(giveawayId);
-            await interaction.reply({ content: '✅ Giveaway ended successfully!', ephemeral: true });
-        } catch (error) {
-            console.error('Error ending giveaway:', error);
-            await interaction.reply({ content: '❌ Failed to end giveaway!', ephemeral: true });
-        }
-    }
-
-    async handleGiveawayReroll(interaction) {
-        if (!interaction.member.permissions.has('MANAGE_GUILD')) {
-            return await interaction.reply({ 
-                content: '❌ You need **Manage Server** permissions to reroll giveaways!', 
-                ephemeral: true 
-            });
-        }
-
-        const giveawayId = interaction.options.getInteger('giveaway_id');
-
-        try {
-            const result = await interaction.bot.giveawaySystem.rerollGiveaway(giveawayId);
-            if (result.success) {
-                const winnerMentions = result.winners.map(w => `<@${w.user_id}>`).join(', ');
-                await interaction.reply({ content: `🎉 New winners: ${winnerMentions}!`, ephemeral: true });
-            } else {
-                await interaction.reply({ content: `❌ ${result.message}`, ephemeral: true });
-            }
-        } catch (error) {
-            console.error('Error rerolling giveaway:', error);
-            await interaction.reply({ content: '❌ Failed to reroll giveaway!', ephemeral: true });
-        }
-    }
-
-    async handleGiveawayList(interaction) {
-        try {
-            const giveaways = await interaction.bot.giveawaySystem.getServerGiveaways(interaction.guild.id, false, 5);
-            
-            if (giveaways.length === 0) {
-                return await interaction.reply('📭 No active giveaways in this server!');
-            }
-
-            const embed = new EmbedBuilder()
-                .setColor(config.colors.primary)
-                .setTitle('🎉 Active Giveaways')
-                .setDescription('Here are the current active giveaways:')
-                .setTimestamp();
-
-            for (const giveaway of giveaways) {
-                const endTime = new Date(giveaway.created_at);
-                endTime.setMinutes(endTime.getMinutes() + giveaway.duration);
-                
-                embed.addFields({
-                    name: `ID: ${giveaway.id} - ${giveaway.title}`,
-                    value: `**Prize:** ${giveaway.prize}\n**Winners:** ${giveaway.winner_count}\n**Ends:** <t:${Math.floor(endTime.getTime() / 1000)}:R>`,
-                    inline: true
-                });
-            }
-
-            await interaction.reply({ embeds: [embed] });
-        } catch (error) {
-            console.error('Error listing giveaways:', error);
-            await interaction.reply({ content: '❌ Failed to list giveaways!', ephemeral: true });
-        }
-    }
-
-    async handleGiveawayStats(interaction) {
-        const giveawayId = interaction.options.getInteger('giveaway_id');
-
-        try {
-            const stats = await interaction.bot.giveawaySystem.getGiveawayStats(giveawayId);
-            if (!stats) {
-                return await interaction.reply({ content: '❌ Giveaway not found!', ephemeral: true });
-            }
-
-            const embed = new EmbedBuilder()
-                .setColor(config.colors.info)
-                .setTitle(`📊 Giveaway #${giveawayId} Statistics`)
-                .addFields(
-                    { name: '👥 Total Entries', value: stats.totalEntries.toString(), inline: true },
-                    { name: '👤 Regular Members', value: stats.regularEntries.toString(), inline: true },
-                    { name: '🚀 Server Boosters', value: stats.boosterEntries.toString(), inline: true },
-                    { name: '⭐ Premium Members', value: stats.premiumEntries.toString(), inline: true },
-                    { name: '⚖️ Total Weight', value: stats.totalWeight.toString(), inline: true },
-                    { name: '📈 Weighted Distribution', value: `Regular: ${((stats.regularEntries / stats.totalWeight) * 100).toFixed(1)}%\nBoosters: ${((stats.boosterEntries * 2 / stats.totalWeight) * 100).toFixed(1)}%\nPremium: ${((stats.premiumEntries * 3 / stats.totalWeight) * 100).toFixed(1)}%`, inline: false }
-                )
-                .setTimestamp();
-
-            await interaction.reply({ embeds: [embed] });
-        } catch (error) {
-            console.error('Error getting giveaway stats:', error);
-            await interaction.reply({ content: '❌ Failed to get giveaway statistics!', ephemeral: true });
-        }
-    }
-
-    async handleGiveawayWins(interaction) {
-        const targetUser = interaction.options.getUser('user') || interaction.user;
-
-        try {
-            const wins = await interaction.bot.giveawaySystem.getUserGiveawayHistory(targetUser.id, 10);
-            
-            if (wins.length === 0) {
-                return await interaction.reply(`🎭 ${targetUser.username} hasn't won any giveaways yet!`);
-            }
-
-            const embed = new EmbedBuilder()
-                .setColor(config.colors.success)
-                .setTitle(`🏆 ${targetUser.username}'s Giveaway Wins`)
-                .setDescription(`${targetUser.username} has won ${wins.length} giveaway${wins.length > 1 ? 's' : ''}!`)
-                .setTimestamp();
-
-            for (const win of wins.slice(0, 5)) {
-                const wonDate = new Date(win.won_at);
-                embed.addFields({
-                    name: `${win.title}`,
-                    value: `**Prize:** ${win.prize}\n**Won:** <t:${Math.floor(wonDate.getTime() / 1000)}:R>`,
-                    inline: true
-                });
-            }
-
-            if (wins.length > 5) {
-                embed.setFooter({ text: `Showing 5 of ${wins.length} total wins` });
-            }
-
-            await interaction.reply({ embeds: [embed] });
-        } catch (error) {
-            console.error('Error getting user wins:', error);
-            await interaction.reply({ content: '❌ Failed to get giveaway history!', ephemeral: true });
-        }
     }
 }
 
