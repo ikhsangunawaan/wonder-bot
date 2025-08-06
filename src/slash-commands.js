@@ -172,7 +172,75 @@ const commands = [
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User to check wins for')
-                        .setRequired(false)))
+                        .setRequired(false))),
+
+    // Leveling Commands
+    new SlashCommandBuilder()
+        .setName('level')
+        .setDescription('Check your or someone else\'s level information')
+        .addUserOption(option =>
+            option.setName('user')
+                .setDescription('User to check levels for')
+                .setRequired(false)),
+
+    new SlashCommandBuilder()
+        .setName('rank')
+        .setDescription('View leveling leaderboards')
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Type of leaderboard to view')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'Overall', value: 'overall' },
+                    { name: 'Text', value: 'text' },
+                    { name: 'Voice', value: 'voice' },
+                    { name: 'Role', value: 'role' }
+                )),
+
+    new SlashCommandBuilder()
+        .setName('rewards')
+        .setDescription('View and claim your unclaimed level rewards'),
+
+    new SlashCommandBuilder()
+        .setName('give-xp')
+        .setDescription('Give XP to a user (Admin only)')
+        .addUserOption(option =>
+            option.setName('user')
+                .setDescription('User to give XP to')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Type of XP to give')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Text', value: 'text' },
+                    { name: 'Voice', value: 'voice' },
+                    { name: 'Role', value: 'role' }
+                ))
+        .addIntegerOption(option =>
+            option.setName('amount')
+                .setDescription('Amount of XP to give')
+                .setRequired(true)
+                .setMinValue(1)
+                .setMaxValue(10000)),
+
+    new SlashCommandBuilder()
+        .setName('reset-level')
+        .setDescription('Reset a user\'s levels (Admin only)')
+        .addUserOption(option =>
+            option.setName('user')
+                .setDescription('User to reset levels for')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Type of level to reset')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'All', value: 'all' },
+                    { name: 'Text', value: 'text' },
+                    { name: 'Voice', value: 'voice' },
+                    { name: 'Role', value: 'role' }
+                ))
 ];
 
 async function deployCommands() {

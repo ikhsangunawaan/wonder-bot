@@ -149,6 +149,53 @@ class Database {
                 won_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // User levels table for leveling system
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS user_levels (
+                user_id TEXT PRIMARY KEY,
+                text_xp INTEGER DEFAULT 0,
+                text_level INTEGER DEFAULT 1,
+                voice_xp INTEGER DEFAULT 0,
+                voice_level INTEGER DEFAULT 1,
+                role_xp INTEGER DEFAULT 0,
+                role_level INTEGER DEFAULT 1,
+                total_xp INTEGER DEFAULT 0,
+                overall_level INTEGER DEFAULT 1,
+                voice_time_total INTEGER DEFAULT 0,
+                last_message_xp DATETIME,
+                last_voice_xp DATETIME,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Level rewards history table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS level_rewards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                level_type TEXT,
+                level INTEGER,
+                reward_type TEXT,
+                reward_data TEXT,
+                claimed INTEGER DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Voice sessions table for tracking voice activity
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS voice_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                channel_id TEXT,
+                joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                left_at DATETIME,
+                duration_minutes INTEGER,
+                xp_earned INTEGER DEFAULT 0
+            )
+        `);
     }
 
     // User economy methods
@@ -702,6 +749,274 @@ class Database {
                 function(err) {
                     if (err) reject(err);
                     resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    // ================== LEVELING SYSTEM METHODS ==================
+
+    // Get or create user levels record
+    async getUserLevels(userId) {
+        return new Promise((resolve, reject) => {
+            this.db.get(
+                'SELECT * FROM user_levels WHERE user_id = ?',
+                [userId],
+                async (err, row) => {
+                    if (err) reject(err);
+                    if (!row) {
+                        // Create new levels record
+                        try {
+                            await this.createUserLevels(userId);
+                            // Get the newly created record
+                            this.db.get(
+                                'SELECT * FROM user_levels WHERE user_id = ?',
+                                [userId],
+                                (err, newRow) => {
+                                    if (err) reject(err);
+                                    resolve(newRow);
+                                }
+                            );
+                        } catch (error) {
+                            reject(error);
+                        }
+                    } else {
+                        resolve(row);
+                    }
+                }
+            );
+        });
+    }
+
+    // Create new user levels record
+    async createUserLevels(userId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT OR IGNORE INTO user_levels (user_id) VALUES (?)',
+                [userId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    // Add XP to a specific type (text, voice, role)
+    async addXP(userId, xpType, amount) {
+        return new Promise((resolve, reject) => {
+            const now = new Date().toISOString();
+            let query, params;
+
+            switch (xpType) {
+                case 'text':
+                    query = `UPDATE user_levels SET 
+                        text_xp = text_xp + ?, 
+                        total_xp = total_xp + ?,
+                        last_message_xp = ?,
+                        updated_at = ?
+                        WHERE user_id = ?`;
+                    params = [amount, amount, now, now, userId];
+                    break;
+                case 'voice':
+                    query = `UPDATE user_levels SET 
+                        voice_xp = voice_xp + ?, 
+                        total_xp = total_xp + ?,
+                        last_voice_xp = ?,
+                        updated_at = ?
+                        WHERE user_id = ?`;
+                    params = [amount, amount, now, now, userId];
+                    break;
+                case 'role':
+                    query = `UPDATE user_levels SET 
+                        role_xp = role_xp + ?, 
+                        total_xp = total_xp + ?,
+                        updated_at = ?
+                        WHERE user_id = ?`;
+                    params = [amount, amount, now, userId];
+                    break;
+                default:
+                    reject(new Error('Invalid XP type'));
+                    return;
+            }
+
+            this.db.run(query, params, function(err) {
+                if (err) reject(err);
+                resolve(this.changes);
+            });
+        });
+    }
+
+    // Update level for specific type
+    async updateLevel(userId, levelType, newLevel) {
+        return new Promise((resolve, reject) => {
+            const now = new Date().toISOString();
+            let column;
+
+            switch (levelType) {
+                case 'text':
+                    column = 'text_level';
+                    break;
+                case 'voice':
+                    column = 'voice_level';
+                    break;
+                case 'role':
+                    column = 'role_level';
+                    break;
+                case 'overall':
+                    column = 'overall_level';
+                    break;
+                default:
+                    reject(new Error('Invalid level type'));
+                    return;
+            }
+
+            this.db.run(
+                `UPDATE user_levels SET ${column} = ?, updated_at = ? WHERE user_id = ?`,
+                [newLevel, now, userId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    // Add voice time to user
+    async addVoiceTime(userId, minutes) {
+        return new Promise((resolve, reject) => {
+            const now = new Date().toISOString();
+            this.db.run(
+                'UPDATE user_levels SET voice_time_total = voice_time_total + ?, updated_at = ? WHERE user_id = ?',
+                [minutes, now, userId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    // Get top users by level type
+    async getTopUsers(levelType = 'overall', limit = 10) {
+        return new Promise((resolve, reject) => {
+            let orderColumn;
+            switch (levelType) {
+                case 'text':
+                    orderColumn = 'text_level DESC, text_xp DESC';
+                    break;
+                case 'voice':
+                    orderColumn = 'voice_level DESC, voice_xp DESC';
+                    break;
+                case 'role':
+                    orderColumn = 'role_level DESC, role_xp DESC';
+                    break;
+                case 'overall':
+                    orderColumn = 'overall_level DESC, total_xp DESC';
+                    break;
+                default:
+                    orderColumn = 'total_xp DESC';
+            }
+
+            this.db.all(
+                `SELECT ul.*, u.username 
+                 FROM user_levels ul 
+                 JOIN users u ON ul.user_id = u.user_id 
+                 ORDER BY ${orderColumn} 
+                 LIMIT ?`,
+                [limit],
+                (err, rows) => {
+                    if (err) reject(err);
+                    resolve(rows || []);
+                }
+            );
+        });
+    }
+
+    // Create level reward
+    async createLevelReward(userId, levelType, level, rewardType, rewardData) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT INTO level_rewards (user_id, level_type, level, reward_type, reward_data) VALUES (?, ?, ?, ?, ?)',
+                [userId, levelType, level, rewardType, JSON.stringify(rewardData)],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    // Get unclaimed rewards for user
+    async getUnclaimedRewards(userId) {
+        return new Promise((resolve, reject) => {
+            this.db.all(
+                'SELECT * FROM level_rewards WHERE user_id = ? AND claimed = 0 ORDER BY created_at DESC',
+                [userId],
+                (err, rows) => {
+                    if (err) reject(err);
+                    resolve(rows || []);
+                }
+            );
+        });
+    }
+
+    // Claim level reward
+    async claimLevelReward(rewardId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'UPDATE level_rewards SET claimed = 1 WHERE id = ?',
+                [rewardId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    // Start voice session
+    async startVoiceSession(userId, channelId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT INTO voice_sessions (user_id, channel_id) VALUES (?, ?)',
+                [userId, channelId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    // End voice session and calculate XP
+    async endVoiceSession(sessionId, xpEarned) {
+        return new Promise((resolve, reject) => {
+            const now = new Date().toISOString();
+            this.db.run(
+                `UPDATE voice_sessions SET 
+                 left_at = ?, 
+                 duration_minutes = ROUND((julianday(?) - julianday(joined_at)) * 24 * 60), 
+                 xp_earned = ? 
+                 WHERE id = ?`,
+                [now, now, xpEarned, sessionId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    // Get active voice session for user
+    async getActiveVoiceSession(userId) {
+        return new Promise((resolve, reject) => {
+            this.db.get(
+                'SELECT * FROM voice_sessions WHERE user_id = ? AND left_at IS NULL ORDER BY joined_at DESC LIMIT 1',
+                [userId],
+                (err, row) => {
+                    if (err) reject(err);
+                    resolve(row);
                 }
             );
         });

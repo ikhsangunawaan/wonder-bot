@@ -57,6 +57,16 @@ class SlashHandlers {
         await database.updateDailyClaim(interaction.user.id);
         await database.addTransaction(interaction.user.id, 'daily', amount, 'Daily reward claimed');
 
+        // Add role XP for daily login
+        const bot = interaction.client.bot || interaction.client;
+        if (bot.levelingSystem && config.leveling?.enabled) {
+            try {
+                await bot.levelingSystem.addRoleXP(interaction.user.id, 'daily_login');
+            } catch (error) {
+                console.error('Error adding role XP for daily:', error);
+            }
+        }
+
         const embed = new EmbedBuilder()
             .setColor(config.colors.success)
             .setTitle('💰 Daily Reward Claimed!')
@@ -103,6 +113,18 @@ class SlashHandlers {
         await database.updateBalance(interaction.user.id, amount);
         await database.updateWorkClaim(interaction.user.id);
         await database.addTransaction(interaction.user.id, 'work', amount, `Worked: ${randomJob}`);
+
+        // Add role XP for work activity
+        const bot = interaction.client.bot || interaction.client;
+        if (bot.levelingSystem && config.leveling?.enabled) {
+            try {
+                // Use a custom amount based on work earnings
+                const xpAmount = Math.floor(amount / 2); // XP = half of earnings
+                await bot.levelingSystem.addRoleXP(interaction.user.id, 'custom', xpAmount);
+            } catch (error) {
+                console.error('Error adding role XP for work:', error);
+            }
+        }
 
         const embed = new EmbedBuilder()
             .setColor(config.colors.success)
@@ -372,13 +394,23 @@ class SlashHandlers {
                     inline: false
                 },
                 {
+                    name: '📊 Leveling Commands',
+                    value: '`/level` - Check your levels and XP\n`/rank` - View leaderboards\n`/rewards` - Claim level rewards\n`/give-xp` - Give XP (Admin)\n`/reset-level` - Reset levels (Admin)',
+                    inline: false
+                },
+                {
                     name: '⚙️ Admin Commands',
                     value: '`/setup welcome` - Setup welcome system\n`/setup introduction` - Setup introduction channel',
                     inline: false
                 },
                 {
                     name: '💎 Exclusive Perks',
-                    value: '**Server Boosters:** +50 daily, +25 work bonus, **2x giveaway odds**\n**Premium Members:** +100 daily, +50 work bonus, **3x giveaway odds**, **bypass winner restrictions**',
+                    value: '**Server Boosters:** +50 daily, +25 work bonus, **1.5x XP**, **2x giveaway odds**\n**Premium Members:** +100 daily, +50 work bonus, **1.75x XP**, **3x giveaway odds**, **bypass winner restrictions**',
+                    inline: false
+                },
+                {
+                    name: '🏆 Leveling System',
+                    value: '**Text Level:** Gain XP by chatting (15-25 XP per message)\n**Voice Level:** Gain XP in voice channels (10-15 XP per minute)\n**Role Level:** Gain XP through daily activities and achievements\n**Overall Level:** Combined progress from all categories',
                     inline: false
                 }
             )
@@ -610,6 +642,225 @@ class SlashHandlers {
         } catch (error) {
             console.error('Error getting user wins:', error);
             await interaction.reply({ content: '❌ Failed to get giveaway history!', ephemeral: true });
+        }
+    }
+
+    // ================== LEVELING HANDLERS ==================
+
+    async handleLevel(interaction) {
+        try {
+            const targetUser = interaction.options.getUser('user') || interaction.user;
+            const bot = interaction.client.bot || interaction.client;
+            
+            if (!bot.levelingSystem) {
+                await interaction.reply({ content: '❌ Leveling system is not available!', ephemeral: true });
+                return;
+            }
+
+            const embed = await bot.levelingSystem.createLevelEmbed(interaction.user.id, targetUser.id);
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error getting level info:', error);
+            await interaction.reply({ content: '❌ Failed to get level information!', ephemeral: true });
+        }
+    }
+
+    async handleRank(interaction) {
+        try {
+            const type = interaction.options.getString('type') || 'overall';
+            const bot = interaction.client.bot || interaction.client;
+            
+            if (!bot.levelingSystem) {
+                await interaction.reply({ content: '❌ Leveling system is not available!', ephemeral: true });
+                return;
+            }
+
+            const topUsers = await database.getTopUsers(type, 15);
+            
+            const typeEmojis = {
+                text: '💬',
+                voice: '🎤',
+                role: '⭐',
+                overall: '🏆'
+            };
+
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.primary)
+                .setTitle(`${typeEmojis[type]} ${type.charAt(0).toUpperCase() + type.slice(1)} Leaderboard`)
+                .setTimestamp();
+
+            if (topUsers.length === 0) {
+                embed.setDescription('No users found on the leaderboard yet!');
+            } else {
+                let description = '';
+                for (let i = 0; i < topUsers.length; i++) {
+                    const user = topUsers[i];
+                    const position = i + 1;
+                    const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : `${position}.`;
+                    
+                    const xpKey = type === 'overall' ? 'total_xp' : `${type}_xp`;
+                    const levelKey = type === 'overall' ? 'overall_level' : `${type}_level`;
+                    
+                    description += `${medal} **${user.username}** - Level ${user[levelKey]} (${user[xpKey].toLocaleString()} XP)\n`;
+                }
+                embed.setDescription(description);
+            }
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error getting leaderboard:', error);
+            await interaction.reply({ content: '❌ Failed to get leaderboard!', ephemeral: true });
+        }
+    }
+
+    async handleRewards(interaction) {
+        try {
+            const rewards = await database.getUnclaimedRewards(interaction.user.id);
+            
+            if (rewards.length === 0) {
+                await interaction.reply({ content: '🎁 You have no unclaimed rewards!', ephemeral: true });
+                return;
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.success)
+                .setTitle('🎁 Your Unclaimed Rewards')
+                .setDescription(`You have ${rewards.length} unclaimed reward${rewards.length > 1 ? 's' : ''}!`)
+                .setTimestamp();
+
+            for (const reward of rewards.slice(0, 10)) { // Show max 10 rewards
+                const rewardData = JSON.parse(reward.reward_data);
+                const typeEmoji = reward.level_type === 'text' ? '💬' : 
+                                 reward.level_type === 'voice' ? '🎤' : 
+                                 reward.level_type === 'role' ? '⭐' : '🏆';
+                
+                embed.addFields([{
+                    name: `${typeEmoji} Level ${reward.level} - ${reward.level_type.charAt(0).toUpperCase() + reward.level_type.slice(1)}`,
+                    value: rewardData.message,
+                    inline: true
+                }]);
+            }
+
+            if (rewards.length > 10) {
+                embed.setFooter({ text: `Showing 10 of ${rewards.length} rewards` });
+            }
+
+            // Auto-claim all rewards
+            let totalCurrency = 0;
+            for (const reward of rewards) {
+                const rewardData = JSON.parse(reward.reward_data);
+                if (rewardData.type === 'currency') {
+                    totalCurrency += rewardData.amount;
+                }
+                await database.claimLevelReward(reward.id);
+            }
+
+            if (totalCurrency > 0) {
+                await database.updateBalance(interaction.user.id, totalCurrency);
+                embed.addFields([{
+                    name: '💰 Currency Claimed',
+                    value: `You received **${totalCurrency}** ${config.currency.symbol} ${config.currency.name}!`,
+                    inline: false
+                }]);
+            }
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error handling rewards:', error);
+            await interaction.reply({ content: '❌ Failed to get rewards!', ephemeral: true });
+        }
+    }
+
+    async handleGiveXP(interaction) {
+        try {
+            // Check permissions
+            if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+                await interaction.reply({ content: '❌ You need Administrator permissions to use this command!', ephemeral: true });
+                return;
+            }
+
+            const targetUser = interaction.options.getUser('user');
+            const xpType = interaction.options.getString('type');
+            const amount = interaction.options.getInteger('amount');
+            const bot = interaction.client.bot || interaction.client;
+
+            if (!bot.levelingSystem) {
+                await interaction.reply({ content: '❌ Leveling system is not available!', ephemeral: true });
+                return;
+            }
+
+            await database.createUser(targetUser.id, targetUser.username);
+            await database.addXP(targetUser.id, xpType, amount);
+
+            // Check for level up
+            const levelData = await database.getUserLevels(targetUser.id);
+            const newLevel = bot.levelingSystem.getLevelFromXP(levelData[`${xpType}_xp`]);
+            const currentLevel = levelData[`${xpType}_level`];
+
+            if (newLevel > currentLevel) {
+                await bot.levelingSystem.handleLevelUp(targetUser.id, xpType, currentLevel, newLevel, interaction.channel);
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.success)
+                .setTitle('✅ XP Given!')
+                .setDescription(`Successfully gave **${amount} ${xpType} XP** to ${targetUser}!`)
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error giving XP:', error);
+            await interaction.reply({ content: '❌ Failed to give XP!', ephemeral: true });
+        }
+    }
+
+    async handleResetLevel(interaction) {
+        try {
+            // Check permissions
+            if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+                await interaction.reply({ content: '❌ You need Administrator permissions to use this command!', ephemeral: true });
+                return;
+            }
+
+            const targetUser = interaction.options.getUser('user');
+            const resetType = interaction.options.getString('type') || 'all';
+
+            await database.createUser(targetUser.id, targetUser.username);
+
+            if (resetType === 'all') {
+                // Reset all levels and XP
+                await database.db.run(`
+                    UPDATE user_levels SET 
+                    text_xp = 0, text_level = 1,
+                    voice_xp = 0, voice_level = 1,
+                    role_xp = 0, role_level = 1,
+                    total_xp = 0, overall_level = 1,
+                    voice_time_total = 0
+                    WHERE user_id = ?
+                `, [targetUser.id]);
+            } else {
+                // Reset specific type
+                const xpColumn = `${resetType}_xp`;
+                const levelColumn = `${resetType}_level`;
+                await database.db.run(`
+                    UPDATE user_levels SET 
+                    ${xpColumn} = 0, 
+                    ${levelColumn} = 1,
+                    total_xp = total_xp - ${xpColumn}
+                    WHERE user_id = ?
+                `, [targetUser.id]);
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.warning)
+                .setTitle('🔄 Levels Reset!')
+                .setDescription(`Successfully reset **${resetType === 'all' ? 'all levels' : resetType + ' level'}** for ${targetUser}!`)
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error resetting levels:', error);
+            await interaction.reply({ content: '❌ Failed to reset levels!', ephemeral: true });
         }
     }
 }

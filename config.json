@@ -68,5 +68,51 @@
       "premiumBypass": true,
       "accountAgeMin": 7
     }
+  },
+  "leveling": {
+    "enabled": true,
+    "xp": {
+      "text": {
+        "base": 15,
+        "bonus": 5,
+        "cooldown": 60000,
+        "maxPerMessage": 25,
+        "multipliers": {
+          "booster": 1.5,
+          "premium": 1.75
+        }
+      },
+      "voice": {
+        "base": 10,
+        "bonus": 5,
+        "minDuration": 60000,
+        "multipliers": {
+          "booster": 1.5,
+          "premium": 1.75
+        }
+      },
+      "role": {
+        "dailyLogin": 50,
+        "messageStreak": 25,
+        "voiceStreak": 30,
+        "helpingOthers": 100,
+        "eventParticipation": 200,
+        "multipliers": {
+          "booster": 1.25,
+          "premium": 1.5
+        }
+      }
+    },
+    "rewards": {
+      "announceInChannel": true,
+      "dmUser": false,
+      "currencyRewards": true,
+      "roleRewards": true,
+      "titleRewards": true
+    },
+    "leaderboard": {
+      "maxDisplayed": 15,
+      "updateInterval": 300000
+    }
   }
 }
