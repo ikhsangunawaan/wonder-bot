@@ -7,6 +7,8 @@ const CanvasUtils = require('./utils/canvas');
 const { deployCommands } = require('./slash-commands');
 const SlashHandlers = require('./slash-handlers');
 const RoleManager = require('./role-manager');
+const ShopSystem = require('./shop-system');
+const CooldownManager = require('./cooldown-manager');
 
 // Load environment variables
 require('dotenv').config();
@@ -28,6 +30,8 @@ class WonderBot {
         this.canvas = new CanvasUtils();
         this.slashHandlers = new SlashHandlers();
         this.roleManager = new RoleManager(this.client);
+        this.shopSystem = new ShopSystem();
+        this.cooldownManager = new CooldownManager();
         
         this.setupEventHandlers();
         this.loadCommands();
@@ -41,6 +45,11 @@ class WonderBot {
             
             // Deploy slash commands
             await deployCommands();
+            
+            // Start periodic cleanup of expired effects
+            setInterval(() => {
+                this.cooldownManager.cleanupExpiredEffects();
+            }, 10 * 60 * 1000); // Every 10 minutes
         });
 
         this.client.on(Events.MessageCreate, this.handleMessage.bind(this));
@@ -114,6 +123,8 @@ class WonderBot {
             }
         } else if (interaction.isButton()) {
             await this.handleButtonInteraction(interaction);
+        } else if (interaction.isStringSelectMenu()) {
+            await this.handleSelectMenuInteraction(interaction);
         } else if (interaction.isModalSubmit()) {
             await this.handleModalSubmit(interaction);
         }
@@ -126,6 +137,16 @@ class WonderBot {
             case 'intro':
                 await this.showIntroductionModal(interaction);
                 break;
+            case 'purchase':
+                await this.handleItemPurchase(interaction, params[0]);
+                break;
+            case 'shop':
+                if (params[0] === 'back') {
+                    const embed = this.shopSystem.createShopEmbed();
+                    const categoryMenu = this.shopSystem.createCategoryMenu();
+                    await interaction.update({ embeds: [embed], components: [categoryMenu] });
+                }
+                break;
             case 'coinflip':
                 await this.handleCoinflipGame(interaction, params[0], parseInt(params[1]));
                 break;
@@ -135,6 +156,46 @@ class WonderBot {
             case 'slots':
                 await this.handleSlotsGame(interaction, parseInt(params[0]));
                 break;
+        }
+    }
+
+    async handleSelectMenuInteraction(interaction) {
+        const [action, ...params] = interaction.customId.split('_');
+
+        if (action === 'shop') {
+            if (params[0] === 'category') {
+                const category = interaction.values[0];
+                const embed = this.shopSystem.createCategoryEmbed(category);
+                const itemMenu = this.shopSystem.createItemMenu(category);
+                await interaction.update({ embeds: [embed], components: [itemMenu] });
+            } else if (params[0] === 'item') {
+                const itemId = interaction.values[0];
+                const embed = this.shopSystem.createItemDetailEmbed(itemId);
+                const purchaseButton = this.shopSystem.createPurchaseButton(itemId);
+                await interaction.update({ embeds: [embed], components: [purchaseButton] });
+            }
+        }
+    }
+
+    async handleItemPurchase(interaction, itemId) {
+        const result = await this.shopSystem.purchaseItem(interaction.user.id, itemId);
+        
+        if (result.success) {
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.success)
+                .setTitle('✅ Purchase Successful!')
+                .setDescription(result.message)
+                .setTimestamp();
+            
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        } else {
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.error)
+                .setTitle('❌ Purchase Failed')
+                .setDescription(result.message)
+                .setTimestamp();
+            
+            await interaction.reply({ embeds: [embed], ephemeral: true });
         }
     }
 
@@ -330,16 +391,11 @@ class WonderBot {
         this.addCommand('daily', {
             description: 'Claim your daily WonderCash',
             execute: async (message, args, bot) => {
-                const user = await database.getUser(message.author.id);
-                const now = new Date();
-                const lastClaimed = user.daily_last_claimed ? new Date(user.daily_last_claimed) : null;
-
-                if (lastClaimed && now - lastClaimed < 24 * 60 * 60 * 1000) {
-                    const timeLeft = 24 * 60 * 60 * 1000 - (now - lastClaimed);
-                    const hoursLeft = Math.floor(timeLeft / (60 * 60 * 1000));
-                    const minutesLeft = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
-                    
-                    return await message.reply(`⏰ You can claim your daily reward in ${hoursLeft}h ${minutesLeft}m!`);
+                // Check cooldown
+                const cooldownCheck = await bot.cooldownManager.checkCooldown(message.author.id, 'daily');
+                if (cooldownCheck.onCooldown) {
+                    const cooldownMessage = bot.cooldownManager.createCooldownMessage('daily', cooldownCheck.timeLeft);
+                    return await message.reply(cooldownMessage);
                 }
 
                 let amount = config.currency.dailyAmount;
@@ -353,14 +409,26 @@ class WonderBot {
                     amount += config.premium.dailyBonus;
                 }
 
+                // Check for daily double effect
+                const hasDouble = await bot.cooldownManager.hasDailyDouble(message.author.id);
+                if (hasDouble) {
+                    amount *= 2;
+                }
+
+                // Check for experience boost
+                const hasExpBoost = await bot.cooldownManager.hasExperienceBoost(message.author.id);
+                if (hasExpBoost) {
+                    amount += Math.floor(amount * 0.2); // 20% bonus
+                }
+
                 await database.updateBalance(message.author.id, amount);
-                await database.updateDailyClaim(message.author.id);
+                await bot.cooldownManager.setCooldown(message.author.id, 'daily');
                 await database.addTransaction(message.author.id, 'daily', amount, 'Daily reward claimed');
 
                 const embed = new EmbedBuilder()
                     .setColor(config.colors.success)
                     .setTitle('💰 Daily Reward Claimed!')
-                    .setDescription(`You received **${amount}** ${config.currency.symbol} ${config.currency.name}!`)
+                    .setDescription(`You received **${amount}** ${config.currency.symbol} ${config.currency.name}!${hasDouble ? '\n🚀 **Daily Booster** activated! (2x reward)' : ''}${hasExpBoost ? '\n📚 **Experience Boost** applied! (+20%)' : ''}`)
                     .setFooter({ text: 'Come back tomorrow for another reward!' })
                     .setTimestamp();
 
@@ -371,15 +439,11 @@ class WonderBot {
         this.addCommand('work', {
             description: 'Work to earn WonderCash',
             execute: async (message, args, bot) => {
-                const user = await database.getUser(message.author.id);
-                const now = new Date();
-                const lastWorked = user.work_last_used ? new Date(user.work_last_used) : null;
-
-                if (lastWorked && now - lastWorked < 60 * 60 * 1000) {
-                    const timeLeft = 60 * 60 * 1000 - (now - lastWorked);
-                    const minutesLeft = Math.floor(timeLeft / (60 * 1000));
-                    
-                    return await message.reply(`⏰ You can work again in ${minutesLeft} minutes!`);
+                // Check cooldown
+                const cooldownCheck = await bot.cooldownManager.checkCooldown(message.author.id, 'work');
+                if (cooldownCheck.onCooldown) {
+                    const cooldownMessage = bot.cooldownManager.createCooldownMessage('work', cooldownCheck.timeLeft);
+                    return await message.reply(cooldownMessage);
                 }
 
                 const jobs = [
@@ -401,16 +465,22 @@ class WonderBot {
                     amount += config.premium.workBonus;
                 }
 
+                // Check for experience boost
+                const hasExpBoost = await bot.cooldownManager.hasExperienceBoost(message.author.id);
+                if (hasExpBoost) {
+                    amount += Math.floor(amount * 0.2); // 20% bonus
+                }
+
                 const randomJob = jobs[Math.floor(Math.random() * jobs.length)];
 
                 await database.updateBalance(message.author.id, amount);
-                await database.updateWorkClaim(message.author.id);
+                await bot.cooldownManager.setCooldown(message.author.id, 'work');
                 await database.addTransaction(message.author.id, 'work', amount, `Worked: ${randomJob}`);
 
                 const embed = new EmbedBuilder()
                     .setColor(config.colors.success)
                     .setTitle('💼 Work Complete!')
-                    .setDescription(`You ${randomJob} and earned **${amount}** ${config.currency.symbol} ${config.currency.name}!`)
+                    .setDescription(`You ${randomJob} and earned **${amount}** ${config.currency.symbol} ${config.currency.name}!${hasExpBoost ? '\n📚 **Experience Boost** applied! (+20%)' : ''}`)
                     .setFooter({ text: 'You can work again in 1 hour!' })
                     .setTimestamp();
 
@@ -451,6 +521,16 @@ class WonderBot {
             description: 'Bet WonderCash on a coin flip',
             aliases: ['cf'],
             execute: async (message, args, bot) => {
+                // Check cooldown
+                const member = message.guild.members.cache.get(message.author.id);
+                const cooldownCheck = await bot.cooldownManager.checkCooldown(message.author.id, 'coinflip');
+                const canBypass = await bot.cooldownManager.canBypassCooldown(message.author.id, 'coinflip', member);
+                
+                if (cooldownCheck.onCooldown && !canBypass) {
+                    const cooldownMessage = bot.cooldownManager.createCooldownMessage('coinflip', cooldownCheck.timeLeft);
+                    return await message.reply(cooldownMessage);
+                }
+
                 if (!args[0] || !args[1]) {
                     return await message.reply('❌ Usage: `w.coinflip <heads/tails> <amount>`');
                 }
@@ -471,18 +551,32 @@ class WonderBot {
                     return await message.reply(`❌ You don't have enough ${config.currency.name}! Your balance: ${user.balance} ${config.currency.symbol}`);
                 }
 
+                // Check for gambling luck effect
+                const hasLuck = await bot.cooldownManager.applyGamblingLuck(message.author.id);
+                let winChance = 0.5;
+                if (hasLuck) {
+                    winChance = 0.65; // 65% win chance with luck
+                }
+
                 const result = Math.random() < 0.5 ? 'heads' : 'tails';
-                const won = choice === result;
+                let won = choice === result;
+                
+                // Apply luck effect
+                if (hasLuck && !won && Math.random() < 0.3) {
+                    won = true; // 30% chance to turn loss into win with luck
+                }
+
                 const winAmount = won ? amount : -amount;
 
                 await database.updateBalance(message.author.id, winAmount);
+                await bot.cooldownManager.setCooldown(message.author.id, 'coinflip');
                 await database.addTransaction(message.author.id, 'coinflip', winAmount, `Coinflip ${won ? 'win' : 'loss'}: ${choice} vs ${result}`);
 
                 const embed = new EmbedBuilder()
                     .setColor(won ? config.colors.success : config.colors.error)
                     .setTitle('🪙 Coin Flip Result')
-                    .setDescription(`The coin landed on **${result}**!\n\n${won ? '🎉 You won!' : '😔 You lost!'}\n**${won ? '+' : ''}${winAmount}** ${config.currency.symbol} ${config.currency.name}`)
-                    .setFooter({ text: `Your balance: ${user.balance + winAmount} ${config.currency.symbol}` })
+                    .setDescription(`The coin landed on **${result}**!\n\n${won ? '🎉 You won!' : '😔 You lost!'}\n**${won ? '+' : ''}${winAmount}** ${config.currency.symbol} ${config.currency.name}${hasLuck ? '\n🍀 **Lucky Charm** used!' : ''}`)
+                    .setFooter({ text: `Your balance: ${user.balance + winAmount} ${config.currency.symbol} | Next flip in 2 minutes` })
                     .setTimestamp();
 
                 await message.reply({ embeds: [embed] });
@@ -605,6 +699,84 @@ class WonderBot {
             }
         });
 
+        // Shop and inventory commands
+        this.addCommand('shop', {
+            description: 'Browse the Wonder Shop',
+            execute: async (message, args, bot) => {
+                const embed = bot.shopSystem.createShopEmbed();
+                const categoryMenu = bot.shopSystem.createCategoryMenu();
+                await message.reply({ embeds: [embed], components: [categoryMenu] });
+            }
+        });
+
+        this.addCommand('inventory', {
+            description: 'View your inventory',
+            aliases: ['inv'],
+            execute: async (message, args, bot) => {
+                const inventory = await database.getUserInventory(message.author.id);
+                
+                if (inventory.length === 0) {
+                    return await message.reply('🎒 Your inventory is empty! Visit the shop with `w.shop` to buy items.');
+                }
+
+                const embed = new EmbedBuilder()
+                    .setColor(config.colors.primary)
+                    .setTitle('🎒 Your Inventory')
+                    .setDescription('Here are all your items:')
+                    .setFooter({ text: 'Use w.use <item_name> to use consumable items!' })
+                    .setTimestamp();
+
+                let itemsList = '';
+                for (const item of inventory) {
+                    const itemData = bot.shopSystem.getItem(item.item_id);
+                    if (itemData) {
+                        itemsList += `${itemData.emoji} **${itemData.name}** x${item.quantity}\n`;
+                    }
+                }
+
+                embed.addFields({
+                    name: '📦 Items',
+                    value: itemsList || 'No items found',
+                    inline: false
+                });
+
+                await message.reply({ embeds: [embed] });
+            }
+        });
+
+        this.addCommand('use', {
+            description: 'Use a consumable item',
+            execute: async (message, args, bot) => {
+                if (!args[0]) {
+                    return await message.reply('❌ Usage: `w.use <item_name>`\nExample: `w.use daily_booster`');
+                }
+
+                // Check cooldown for item usage
+                const cooldownCheck = await bot.cooldownManager.checkCooldown(message.author.id, 'use_item');
+                if (cooldownCheck.onCooldown) {
+                    const cooldownMessage = bot.cooldownManager.createCooldownMessage('use_item', cooldownCheck.timeLeft);
+                    return await message.reply(cooldownMessage);
+                }
+
+                const itemId = args[0].toLowerCase();
+                const result = await bot.shopSystem.useItem(message.author.id, itemId);
+
+                if (!result.success) {
+                    return await message.reply(`❌ ${result.message}`);
+                }
+
+                await bot.cooldownManager.setCooldown(message.author.id, 'use_item');
+
+                const embed = new EmbedBuilder()
+                    .setColor(config.colors.success)
+                    .setTitle('✨ Item Used!')
+                    .setDescription(result.message)
+                    .setTimestamp();
+
+                await message.reply({ embeds: [embed] });
+            }
+        });
+
         // Role and perks commands
         this.addCommand('perks', {
             description: 'View your role perks and bonuses',
@@ -635,13 +807,18 @@ class WonderBot {
                             inline: false
                         },
                         {
+                            name: '🏪 Shop Commands',
+                            value: '`w.shop` - Browse the Wonder Shop\n`w.inventory` - View your items\n`w.use <item>` - Use consumable items',
+                            inline: false
+                        },
+                        {
                             name: '💎 Role Commands',
                             value: '`w.perks` - View your role perks and bonuses',
                             inline: false
                         },
                         {
                             name: '📝 Other Features',
-                            value: '• Introduction cards with `/intro` slash command\n• Welcome messages for new members\n• Exclusive perks for boosters and premium members',
+                            value: '• Introduction cards with `/intro` slash command\n• Welcome messages for new members\n• Exclusive perks for boosters and premium members\n• Advanced shop system with consumables and collectibles\n• Cooldown system prevents spamming',
                             inline: false
                         }
                     )

@@ -4,17 +4,20 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 
 ## ✨ Features
 
-### 💰 Economy System
+### 💰 Advanced Economy System
 - **WonderCash Currency**: Earn and spend virtual currency
-- **Daily Rewards**: Claim daily WonderCash bonuses
-- **Work System**: Work every hour to earn more currency
+- **Daily Rewards**: Claim daily WonderCash bonuses (24h cooldown)
+- **Work System**: Work every hour to earn more currency (1h cooldown)
 - **Transaction History**: Track all your earnings and spending
 - **Leaderboard**: Compete with other members
+- **Anti-Spam Protection**: Cooldown system prevents command abuse
 
 ### 🎮 Interactive Games
-- **Coin Flip**: Bet on heads or tails
-- **Dice Rolling**: Roll dice for various multipliers
-- **Slot Machine**: Try your luck with emoji slots
+- **Coin Flip**: Bet on heads or tails (2min cooldown)
+- **Dice Rolling**: Roll dice for various multipliers (3min cooldown)
+- **Slot Machine**: Try your luck with emoji slots (5min cooldown)
+- **Lucky Charm Effect**: Use items to increase win rates
+- **Premium Perks**: Reduced cooldowns for boosters and premium members
 
 ### 📝 Introduction Cards
 - **Custom Cards**: Create beautiful introduction cards with your info
@@ -33,11 +36,20 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 - **Introduction Button**: Quick access to create introduction cards
 - **Server Setup**: Admin commands to configure channels
 
+### 🏪 Advanced Shop System
+- **Item Categories**: Consumables, Collectibles, Profile Items, Special Items
+- **Consumable Items**: Boosters, potions, and temporary effects
+- **Collectible Items**: Rare trophies and valuable items
+- **Profile Customization**: Custom titles, colors, and borders
+- **Mystery Boxes**: Random rewards with valuable items
+- **Interactive Shopping**: Browse categories with select menus and buttons
+
 ### ⚡ Modern Interface
 - **Slash Commands**: Full slash command support
 - **Prefix Commands**: Traditional `w.` prefix commands
 - **Interactive Buttons**: Click-to-interact features
 - **Beautiful Embeds**: Rich, colorful message embeds
+- **Select Menus**: Easy navigation through shop categories
 
 ## 🚀 Quick Start
 
@@ -94,6 +106,13 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 | `w.work` / `/work` | Work to earn WonderCash | `w.work` |
 | `w.leaderboard` / `/leaderboard` | View top earners | `w.leaderboard` |
 
+### 🏪 Shop Commands
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `w.shop` | Browse the Wonder Shop | `w.shop` |
+| `w.inventory` / `w.inv` | View your inventory | `w.inventory` |
+| `w.use` | Use consumable items | `w.use daily_booster` |
+
 ### 🎮 Game Commands
 | Command | Description | Usage |
 |---------|-------------|-------|
@@ -139,6 +158,28 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 - Custom embed colors
 - Priority support
 - VIP treatment
+- **50% reduced** game cooldowns
+- **15% discount** on shop items
+
+## ⏰ Cooldown System
+
+To prevent spam and maintain balance, commands have cooldowns:
+
+### 💰 Economy Cooldowns
+- **Daily Reward**: 24 hours
+- **Work Command**: 1 hour (can be bypassed with ⚡ Work Energy item)
+- **Item Usage**: 1 minute between uses
+
+### 🎮 Game Cooldowns
+- **Coin Flip**: 2 minutes
+- **Dice Roll**: 3 minutes  
+- **Slot Machine**: 5 minutes
+- **Mystery Box**: 30 minutes
+
+### 🎁 Cooldown Reduction Perks
+- **Server Boosters**: 25% reduction on game cooldowns
+- **Premium Members**: 50% reduction on game cooldowns
+- **Work Energy Item**: Temporarily removes work cooldown
 
 ## 🛠️ Configuration
 

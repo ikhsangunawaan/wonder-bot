@@ -37,5 +37,22 @@
     "error": "#EF4444",
     "warning": "#F59E0B",
     "info": "#3B82F6"
+  },
+  "cooldowns": {
+    "daily": 1440,
+    "work": 60,
+    "coinflip": 2,
+    "dice": 3,
+    "slots": 5,
+    "mystery_box": 30,
+    "use_item": 1
+  },
+  "shop": {
+    "categories": ["consumables", "collectibles", "profile", "special"],
+    "dailyFeatured": true,
+    "discounts": {
+      "booster": 0.1,
+      "premium": 0.15
+    }
   }
 }
