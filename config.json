@@ -54,5 +54,19 @@
       "booster": 0.1,
       "premium": 0.15
     }
+  },
+  "giveaways": {
+    "maxDuration": 10080,
+    "maxWinners": 10,
+    "winnerCooldown": 10080,
+    "odds": {
+      "regular": 1.0,
+      "booster": 2.0,
+      "premium": 3.0
+    },
+    "restrictions": {
+      "premiumBypass": true,
+      "accountAgeMin": 7
+    }
   }
 }

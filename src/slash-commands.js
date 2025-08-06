@@ -102,7 +102,77 @@ const commands = [
 
     new SlashCommandBuilder()
         .setName('help')
-        .setDescription('Show bot commands and information')
+        .setDescription('Show bot commands and information'),
+
+    new SlashCommandBuilder()
+        .setName('giveaway')
+        .setDescription('Giveaway management commands')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('start')
+                .setDescription('Start a new giveaway (Admin only)')
+                .addStringOption(option =>
+                    option.setName('duration')
+                        .setDescription('Giveaway duration (e.g., 1h, 30m, 2d)')
+                        .setRequired(true))
+                .addIntegerOption(option =>
+                    option.setName('winners')
+                        .setDescription('Number of winners')
+                        .setRequired(true)
+                        .setMinValue(1)
+                        .setMaxValue(10))
+                .addStringOption(option =>
+                    option.setName('prize')
+                        .setDescription('Prize description')
+                        .setRequired(true))
+                .addStringOption(option =>
+                    option.setName('title')
+                        .setDescription('Giveaway title')
+                        .setRequired(false))
+                .addChannelOption(option =>
+                    option.setName('channel')
+                        .setDescription('Channel to post giveaway in')
+                        .setRequired(false))
+                .addBooleanOption(option =>
+                    option.setName('restrict_winners')
+                        .setDescription('Restrict previous winners from entering')
+                        .setRequired(false)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('end')
+                .setDescription('End a giveaway early (Admin only)')
+                .addIntegerOption(option =>
+                    option.setName('giveaway_id')
+                        .setDescription('ID of the giveaway to end')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('reroll')
+                .setDescription('Reroll giveaway winners (Admin only)')
+                .addIntegerOption(option =>
+                    option.setName('giveaway_id')
+                        .setDescription('ID of the giveaway to reroll')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('List active giveaways'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('stats')
+                .setDescription('View giveaway statistics')
+                .addIntegerOption(option =>
+                    option.setName('giveaway_id')
+                        .setDescription('ID of the giveaway to view stats for')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('wins')
+                .setDescription('View your giveaway wins')
+                .addUserOption(option =>
+                    option.setName('user')
+                        .setDescription('User to check wins for')
+                        .setRequired(false)))
 ];
 
 async function deployCommands() {

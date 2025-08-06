@@ -105,6 +105,50 @@ class Database {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // Giveaways table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS giveaways (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                channel_id TEXT,
+                message_id TEXT,
+                title TEXT,
+                description TEXT,
+                prize TEXT,
+                winner_count INTEGER DEFAULT 1,
+                duration INTEGER,
+                requirements TEXT,
+                created_by TEXT,
+                restrict_winners INTEGER DEFAULT 1,
+                ended INTEGER DEFAULT 0,
+                cancelled INTEGER DEFAULT 0,
+                winners TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Giveaway entries table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS giveaway_entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                giveaway_id INTEGER,
+                user_id TEXT,
+                entry_weight REAL DEFAULT 1.0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(giveaway_id, user_id)
+            )
+        `);
+
+        // Giveaway winners history table
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS giveaway_winners (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                giveaway_id INTEGER,
+                user_id TEXT,
+                won_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
     }
 
     // User economy methods
@@ -480,6 +524,225 @@ class Database {
                     resolve(this.lastID);
                 }
             );
+        });
+    }
+
+    // Giveaway methods
+    async createGiveaway(giveawayData) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                `INSERT INTO giveaways (guild_id, channel_id, title, description, prize, winner_count, duration, requirements, created_by, restrict_winners) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    giveawayData.guildId,
+                    giveawayData.channelId,
+                    giveawayData.title,
+                    giveawayData.description,
+                    giveawayData.prize,
+                    giveawayData.winnerCount,
+                    giveawayData.duration,
+                    JSON.stringify(giveawayData.requirements),
+                    giveawayData.createdBy,
+                    giveawayData.restrictWinners ? 1 : 0
+                ],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    async getGiveaway(giveawayId) {
+        return new Promise((resolve, reject) => {
+            this.db.get(
+                'SELECT *, requirements as requirements_json FROM giveaways WHERE id = ?',
+                [giveawayId],
+                (err, row) => {
+                    if (err) reject(err);
+                    if (row) {
+                        row.requirements = JSON.parse(row.requirements_json || '{}');
+                        row.winners = JSON.parse(row.winners || '[]');
+                    }
+                    resolve(row);
+                }
+            );
+        });
+    }
+
+    async updateGiveawayMessageId(giveawayId, messageId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'UPDATE giveaways SET message_id = ? WHERE id = ?',
+                [messageId, giveawayId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    async addGiveawayEntry(userId, giveawayId, entryWeight = 1.0) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT INTO giveaway_entries (giveaway_id, user_id, entry_weight) VALUES (?, ?, ?)',
+                [giveawayId, userId, entryWeight],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    async hasEnteredGiveaway(userId, giveawayId) {
+        return new Promise((resolve, reject) => {
+            this.db.get(
+                'SELECT id FROM giveaway_entries WHERE giveaway_id = ? AND user_id = ?',
+                [giveawayId, userId],
+                (err, row) => {
+                    if (err) reject(err);
+                    resolve(!!row);
+                }
+            );
+        });
+    }
+
+    async getGiveawayEntries(giveawayId) {
+        return new Promise((resolve, reject) => {
+            this.db.all(
+                'SELECT * FROM giveaway_entries WHERE giveaway_id = ?',
+                [giveawayId],
+                (err, rows) => {
+                    if (err) reject(err);
+                    resolve(rows);
+                }
+            );
+        });
+    }
+
+    async getGiveawayEntryCount(giveawayId) {
+        return new Promise((resolve, reject) => {
+            this.db.get(
+                'SELECT COUNT(*) as count FROM giveaway_entries WHERE giveaway_id = ?',
+                [giveawayId],
+                (err, row) => {
+                    if (err) reject(err);
+                    resolve(row.count);
+                }
+            );
+        });
+    }
+
+    async endGiveaway(giveawayId, winners) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'UPDATE giveaways SET ended = 1, winners = ? WHERE id = ?',
+                [JSON.stringify(winners), giveawayId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    async cancelGiveaway(giveawayId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'UPDATE giveaways SET cancelled = 1 WHERE id = ?',
+                [giveawayId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    async recordGiveawayWin(userId, giveawayId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'INSERT INTO giveaway_winners (giveaway_id, user_id) VALUES (?, ?)',
+                [giveawayId, userId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.lastID);
+                }
+            );
+        });
+    }
+
+    async getRecentGiveawayWin(userId, minutesBack) {
+        return new Promise((resolve, reject) => {
+            const cutoffTime = new Date();
+            cutoffTime.setMinutes(cutoffTime.getMinutes() - minutesBack);
+            
+            this.db.get(
+                `SELECT *, 
+                 (julianday('now') - julianday(won_at)) * 24 * 60 as minutesAgo 
+                 FROM giveaway_winners 
+                 WHERE user_id = ? AND won_at > ? 
+                 ORDER BY won_at DESC LIMIT 1`,
+                [userId, cutoffTime.toISOString()],
+                (err, row) => {
+                    if (err) reject(err);
+                    resolve(row);
+                }
+            );
+        });
+    }
+
+    async updateGiveawayWinners(giveawayId, winners) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                'UPDATE giveaways SET winners = ? WHERE id = ?',
+                [JSON.stringify(winners), giveawayId],
+                function(err) {
+                    if (err) reject(err);
+                    resolve(this.changes);
+                }
+            );
+        });
+    }
+
+    async getUserGiveawayHistory(userId, limit = 10) {
+        return new Promise((resolve, reject) => {
+            this.db.all(
+                `SELECT g.*, gw.won_at 
+                 FROM giveaway_winners gw 
+                 JOIN giveaways g ON gw.giveaway_id = g.id 
+                 WHERE gw.user_id = ? 
+                 ORDER BY gw.won_at DESC 
+                 LIMIT ?`,
+                [userId, limit],
+                (err, rows) => {
+                    if (err) reject(err);
+                    resolve(rows);
+                }
+            );
+        });
+    }
+
+    async getServerGiveaways(guildId, includeEnded = false, limit = 10) {
+        return new Promise((resolve, reject) => {
+            let query = 'SELECT * FROM giveaways WHERE guild_id = ? AND cancelled = 0';
+            if (!includeEnded) {
+                query += ' AND ended = 0';
+            }
+            query += ' ORDER BY created_at DESC LIMIT ?';
+
+            this.db.all(query, [guildId, limit], (err, rows) => {
+                if (err) reject(err);
+                if (rows) {
+                    rows.forEach(row => {
+                        row.requirements = JSON.parse(row.requirements || '{}');
+                        row.winners = JSON.parse(row.winners || '[]');
+                    });
+                }
+                resolve(rows);
+            });
         });
     }
 }

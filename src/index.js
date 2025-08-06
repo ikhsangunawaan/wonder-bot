@@ -9,6 +9,7 @@ const SlashHandlers = require('./slash-handlers');
 const RoleManager = require('./role-manager');
 const ShopSystem = require('./shop-system');
 const CooldownManager = require('./cooldown-manager');
+const GiveawaySystem = require('./giveaway-system');
 
 // Load environment variables
 require('dotenv').config();
@@ -32,6 +33,7 @@ class WonderBot {
         this.roleManager = new RoleManager(this.client);
         this.shopSystem = new ShopSystem();
         this.cooldownManager = new CooldownManager();
+        this.giveawaySystem = new GiveawaySystem(this.client);
         
         this.setupEventHandlers();
         this.loadCommands();
@@ -116,6 +118,11 @@ class WonderBot {
                     case 'help':
                         await this.slashHandlers.handleHelp(interaction);
                         break;
+                    case 'giveaway':
+                        // Pass bot instance for giveaway system access
+                        interaction.bot = this;
+                        await this.slashHandlers.handleGiveaway(interaction);
+                        break;
                 }
             } catch (error) {
                 console.error('Error executing slash command:', error);
@@ -136,6 +143,11 @@ class WonderBot {
         switch (action) {
             case 'intro':
                 await this.showIntroductionModal(interaction);
+                break;
+            case 'giveaway':
+                if (params[0] === 'enter') {
+                    await this.handleGiveawayEntry(interaction, params[1]);
+                }
                 break;
             case 'purchase':
                 await this.handleItemPurchase(interaction, params[0]);
@@ -192,6 +204,34 @@ class WonderBot {
             const embed = new EmbedBuilder()
                 .setColor(config.colors.error)
                 .setTitle('❌ Purchase Failed')
+                .setDescription(result.message)
+                .setTimestamp();
+            
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+    }
+
+    async handleGiveawayEntry(interaction, giveawayId) {
+        const member = interaction.guild.members.cache.get(interaction.user.id);
+        const result = await this.giveawaySystem.enterGiveaway(interaction.user.id, parseInt(giveawayId), member);
+        
+        if (result.success) {
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.success)
+                .setTitle('🎉 Successfully Entered!')
+                .setDescription(result.message)
+                .addFields({
+                    name: '📊 Total Entries',
+                    value: result.entryCount.toString(),
+                    inline: true
+                })
+                .setTimestamp();
+            
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        } else {
+            const embed = new EmbedBuilder()
+                .setColor(config.colors.error)
+                .setTitle('❌ Entry Failed')
                 .setDescription(result.message)
                 .setTimestamp();
             
@@ -777,6 +817,190 @@ class WonderBot {
             }
         });
 
+        // Giveaway commands
+        this.addCommand('gstart', {
+            description: 'Start a giveaway (Admin only)',
+            execute: async (message, args, bot) => {
+                if (!message.member.permissions.has('MANAGE_GUILD')) {
+                    return await message.reply('❌ You need **Manage Server** permissions to create giveaways!');
+                }
+
+                if (args.length < 4) {
+                    return await message.reply('❌ Usage: `w.gstart <duration> <winners> <prize> [title]`\nExample: `w.gstart 1h 1 100 WonderCash Daily Giveaway`');
+                }
+
+                const duration = this.parseDuration(args[0]);
+                if (!duration) {
+                    return await message.reply('❌ Invalid duration! Use format like: 1h, 30m, 2d, etc.');
+                }
+
+                const winnerCount = parseInt(args[1]);
+                if (isNaN(winnerCount) || winnerCount < 1 || winnerCount > 10) {
+                    return await message.reply('❌ Winner count must be between 1 and 10!');
+                }
+
+                const prize = args.slice(2).join(' ');
+                const title = args.length > 4 ? args.slice(3).join(' ') : 'Giveaway';
+
+                try {
+                    const giveaway = await bot.giveawaySystem.createGiveaway(message.guild, message.channel.id, {
+                        title: title,
+                        description: `Win **${prize}**!`,
+                        prize: prize,
+                        winnerCount: winnerCount,
+                        duration: duration,
+                        createdBy: message.author.id,
+                        restrictWinners: true
+                    });
+
+                    const embed = bot.giveawaySystem.createGiveawayEmbed(giveaway);
+                    const button = bot.giveawaySystem.createGiveawayButton(giveaway.id);
+
+                    const giveawayMessage = await message.channel.send({
+                        content: '🎉 **GIVEAWAY** 🎉',
+                        embeds: [embed],
+                        components: [button]
+                    });
+
+                    await database.updateGiveawayMessageId(giveaway.id, giveawayMessage.id);
+                    await message.delete();
+
+                } catch (error) {
+                    console.error('Error creating giveaway:', error);
+                    await message.reply('❌ Failed to create giveaway!');
+                }
+            }
+        });
+
+        this.addCommand('gend', {
+            description: 'End a giveaway early (Admin only)',
+            execute: async (message, args, bot) => {
+                if (!message.member.permissions.has('MANAGE_GUILD')) {
+                    return await message.reply('❌ You need **Manage Server** permissions to end giveaways!');
+                }
+
+                if (!args[0]) {
+                    return await message.reply('❌ Usage: `w.gend <giveaway_id>`');
+                }
+
+                const giveawayId = parseInt(args[0]);
+                if (isNaN(giveawayId)) {
+                    return await message.reply('❌ Please provide a valid giveaway ID!');
+                }
+
+                try {
+                    await bot.giveawaySystem.endGiveaway(giveawayId);
+                    await message.reply('✅ Giveaway ended successfully!');
+                } catch (error) {
+                    console.error('Error ending giveaway:', error);
+                    await message.reply('❌ Failed to end giveaway!');
+                }
+            }
+        });
+
+        this.addCommand('greroll', {
+            description: 'Reroll giveaway winners (Admin only)',
+            execute: async (message, args, bot) => {
+                if (!message.member.permissions.has('MANAGE_GUILD')) {
+                    return await message.reply('❌ You need **Manage Server** permissions to reroll giveaways!');
+                }
+
+                if (!args[0]) {
+                    return await message.reply('❌ Usage: `w.greroll <giveaway_id>`');
+                }
+
+                const giveawayId = parseInt(args[0]);
+                if (isNaN(giveawayId)) {
+                    return await message.reply('❌ Please provide a valid giveaway ID!');
+                }
+
+                try {
+                    const result = await bot.giveawaySystem.rerollGiveaway(giveawayId);
+                    if (result.success) {
+                        const winnerMentions = result.winners.map(w => `<@${w.user_id}>`).join(', ');
+                        await message.reply(`🎉 New winners: ${winnerMentions}!`);
+                    } else {
+                        await message.reply(`❌ ${result.message}`);
+                    }
+                } catch (error) {
+                    console.error('Error rerolling giveaway:', error);
+                    await message.reply('❌ Failed to reroll giveaway!');
+                }
+            }
+        });
+
+        this.addCommand('glist', {
+            description: 'List active giveaways',
+            execute: async (message, args, bot) => {
+                try {
+                    const giveaways = await bot.giveawaySystem.getServerGiveaways(message.guild.id, false, 5);
+                    
+                    if (giveaways.length === 0) {
+                        return await message.reply('📭 No active giveaways in this server!');
+                    }
+
+                    const embed = new EmbedBuilder()
+                        .setColor(config.colors.primary)
+                        .setTitle('🎉 Active Giveaways')
+                        .setDescription('Here are the current active giveaways:')
+                        .setTimestamp();
+
+                    for (const giveaway of giveaways) {
+                        const endTime = new Date(giveaway.created_at);
+                        endTime.setMinutes(endTime.getMinutes() + giveaway.duration);
+                        
+                        embed.addFields({
+                            name: `ID: ${giveaway.id} - ${giveaway.title}`,
+                            value: `**Prize:** ${giveaway.prize}\n**Winners:** ${giveaway.winner_count}\n**Ends:** <t:${Math.floor(endTime.getTime() / 1000)}:R>`,
+                            inline: true
+                        });
+                    }
+
+                    await message.reply({ embeds: [embed] });
+                } catch (error) {
+                    console.error('Error listing giveaways:', error);
+                    await message.reply('❌ Failed to list giveaways!');
+                }
+            }
+        });
+
+        this.addCommand('gwins', {
+            description: 'View your giveaway wins',
+            execute: async (message, args, bot) => {
+                try {
+                    const wins = await bot.giveawaySystem.getUserGiveawayHistory(message.author.id, 10);
+                    
+                    if (wins.length === 0) {
+                        return await message.reply('🎭 You haven\'t won any giveaways yet!');
+                    }
+
+                    const embed = new EmbedBuilder()
+                        .setColor(config.colors.success)
+                        .setTitle('🏆 Your Giveaway Wins')
+                        .setDescription(`You've won ${wins.length} giveaway${wins.length > 1 ? 's' : ''}!`)
+                        .setTimestamp();
+
+                    for (const win of wins.slice(0, 5)) {
+                        const wonDate = new Date(win.won_at);
+                        embed.addFields({
+                            name: `${win.title}`,
+                            value: `**Prize:** ${win.prize}\n**Won:** <t:${Math.floor(wonDate.getTime() / 1000)}:R>`,
+                            inline: true
+                        });
+                    }
+
+                    if (wins.length > 5) {
+                        embed.setFooter({ text: `Showing 5 of ${wins.length} total wins` });
+                    }
+
+                    await message.reply({ embeds: [embed] });
+                } catch (error) {
+                    console.error('Error getting user wins:', error);
+                    await message.reply('❌ Failed to get your giveaway history!');
+                }
+            }
+        });
+
         // Role and perks commands
         this.addCommand('perks', {
             description: 'View your role perks and bonuses',
@@ -812,13 +1036,18 @@ class WonderBot {
                             inline: false
                         },
                         {
+                            name: '🎉 Giveaway Commands',
+                            value: '`w.gstart <time> <winners> <prize>` - Start giveaway (Admin)\n`w.gend <id>` - End giveaway (Admin)\n`w.greroll <id>` - Reroll winners (Admin)\n`w.glist` - List active giveaways\n`w.gwins` - View your wins',
+                            inline: false
+                        },
+                        {
                             name: '💎 Role Commands',
                             value: '`w.perks` - View your role perks and bonuses',
                             inline: false
                         },
                         {
                             name: '📝 Other Features',
-                            value: '• Introduction cards with `/intro` slash command\n• Welcome messages for new members\n• Exclusive perks for boosters and premium members\n• Advanced shop system with consumables and collectibles\n• Cooldown system prevents spamming',
+                            value: '• Introduction cards with `/intro` slash command\n• Welcome messages for new members\n• Exclusive perks for boosters and premium members\n• Advanced shop system with consumables and collectibles\n• Cooldown system prevents spamming\n• **NEW:** Giveaway system with role-based odds and restrictions',
                             inline: false
                         }
                     )
@@ -837,6 +1066,23 @@ class WonderBot {
 
     addCommand(name, command) {
         this.commands.set(name, command);
+    }
+
+    // Parse duration string (e.g., "1h", "30m", "2d") to minutes
+    parseDuration(durationStr) {
+        const match = durationStr.match(/^(\d+)([smhd])$/i);
+        if (!match) return null;
+
+        const value = parseInt(match[1]);
+        const unit = match[2].toLowerCase();
+
+        switch (unit) {
+            case 's': return Math.max(1, Math.floor(value / 60)); // seconds to minutes, minimum 1
+            case 'm': return value; // minutes
+            case 'h': return value * 60; // hours to minutes
+            case 'd': return value * 60 * 24; // days to minutes
+            default: return null;
+        }
     }
 
     async start() {

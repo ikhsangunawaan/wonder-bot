@@ -44,6 +44,15 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 - **Mystery Boxes**: Random rewards with valuable items
 - **Interactive Shopping**: Browse categories with select menus and buttons
 
+### 🎉 Advanced Giveaway System
+- **Weighted Entry System**: Different odds for member types
+- **Role-Based Odds**: Regular (1x), Boosters (2x), Premium (3x) entry chances
+- **Winner Restrictions**: Previous winners blocked for 7 days
+- **Premium Bypass**: Premium members can bypass winner restrictions
+- **Auto Winner Selection**: Weighted random selection algorithm
+- **Management Tools**: Start, end, reroll, and view statistics
+- **Interactive Entry**: Click button to enter giveaways
+
 ### ⚡ Modern Interface
 - **Slash Commands**: Full slash command support
 - **Prefix Commands**: Traditional `w.` prefix commands
@@ -113,6 +122,16 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 | `w.inventory` / `w.inv` | View your inventory | `w.inventory` |
 | `w.use` | Use consumable items | `w.use daily_booster` |
 
+### 🎉 Giveaway Commands
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `w.gstart` / `/giveaway start` | Start a giveaway (Admin) | `w.gstart 1h 1 100 WonderCash` |
+| `w.gend` / `/giveaway end` | End giveaway early (Admin) | `w.gend 1` |
+| `w.greroll` / `/giveaway reroll` | Reroll winners (Admin) | `w.greroll 1` |
+| `w.glist` / `/giveaway list` | List active giveaways | `w.glist` |
+| `w.gwins` / `/giveaway wins` | View your giveaway wins | `w.gwins` |
+| `/giveaway stats` | View giveaway statistics | `/giveaway stats giveaway_id:1` |
+
 ### 🎮 Game Commands
 | Command | Description | Usage |
 |---------|-------------|-------|
@@ -160,6 +179,8 @@ A comprehensive Discord bot featuring economy system, introduction cards, games,
 - VIP treatment
 - **50% reduced** game cooldowns
 - **15% discount** on shop items
+- **3x giveaway entry odds**
+- **Bypass winner restrictions** on giveaways
 
 ## ⏰ Cooldown System
 
