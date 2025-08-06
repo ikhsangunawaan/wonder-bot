@@ -1,8 +1,8 @@
 {
   "prefix": "w.",
   "currency": {
-    "name": "GoldCoins",
-    "symbol": "👑",
+    "name": "WonderCoins",
+    "symbol": "💰",
     "dailyAmount": 100,
     "workAmount": 50
   },

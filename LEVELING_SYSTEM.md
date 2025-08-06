@@ -53,49 +53,49 @@ The Luxury Kingdom Bot features a comprehensive multi-tiered leveling system tha
 
 ## 🎁 Royal Treasury Rewards (Updated for Level 50 Cap)
 
-### Fixed GoldCoins & Title Rewards
+### Fixed WonderCoins & Title Rewards
 These rewards are automatically given and cannot be changed:
 
 ### Text Level Rewards
-- **Level 5:** 500 👑 GoldCoins
-- **Level 10:** 1,000 👑 GoldCoins
-- **Level 20:** 2,000 👑 GoldCoins
+- **Level 5:** 500 💰 WonderCoins
+- **Level 10:** 1,000 💰 WonderCoins
+- **Level 20:** 2,000 💰 WonderCoins
 - **Level 25:** Text Master title
-- **Level 30:** 5,000 👑 GoldCoins
-- **Level 35:** 7,500 👑 GoldCoins
-- **Level 40:** 10,000 👑 GoldCoins
-- **Level 45:** 15,000 👑 GoldCoins
-- **Level 50:** 👑 25,000 👑 GoldCoins - KINGDOM LEGEND STATUS!
+- **Level 30:** 5,000 💰 WonderCoins
+- **Level 35:** 7,500 💰 WonderCoins
+- **Level 40:** 10,000 💰 WonderCoins
+- **Level 45:** 15,000 💰 WonderCoins
+- **Level 50:** 👑 25,000 💰 WonderCoins - KINGDOM LEGEND STATUS!
 
 ### Voice Level Rewards
-- **Level 5:** 750 👑 GoldCoins
-- **Level 10:** 1,500 👑 GoldCoins
-- **Level 20:** 3,000 👑 GoldCoins
+- **Level 5:** 750 💰 WonderCoins
+- **Level 10:** 1,500 💰 WonderCoins
+- **Level 20:** 3,000 💰 WonderCoins
 - **Level 25:** Voice Champion title
-- **Level 30:** 7,500 👑 GoldCoins
-- **Level 35:** 10,000 👑 GoldCoins
-- **Level 40:** 15,000 👑 GoldCoins
-- **Level 45:** 20,000 👑 GoldCoins
-- **Level 50:** 👑 35,000 👑 GoldCoins - KINGDOM LEGEND STATUS!
+- **Level 30:** 7,500 💰 WonderCoins
+- **Level 35:** 10,000 💰 WonderCoins
+- **Level 40:** 15,000 💰 WonderCoins
+- **Level 45:** 20,000 💰 WonderCoins
+- **Level 50:** 👑 35,000 💰 WonderCoins - KINGDOM LEGEND STATUS!
 
 ### Role Level Rewards
-- **Level 5:** 1,000 👑 GoldCoins
-- **Level 10:** 2,500 👑 GoldCoins
-- **Level 20:** 5,000 👑 GoldCoins
+- **Level 5:** 1,000 💰 WonderCoins
+- **Level 10:** 2,500 💰 WonderCoins
+- **Level 20:** 5,000 💰 WonderCoins
 - **Level 25:** Community Leader title
-- **Level 30:** 10,000 👑 GoldCoins
-- **Level 35:** 15,000 👑 GoldCoins
-- **Level 40:** 20,000 👑 GoldCoins
-- **Level 45:** 30,000 👑 GoldCoins
-- **Level 50:** 👑 50,000 👑 GoldCoins - KINGDOM LEGEND STATUS!
+- **Level 30:** 10,000 💰 WonderCoins
+- **Level 35:** 15,000 💰 WonderCoins
+- **Level 40:** 20,000 💰 WonderCoins
+- **Level 45:** 30,000 💰 WonderCoins
+- **Level 50:** 👑 50,000 💰 WonderCoins - KINGDOM LEGEND STATUS!
 
 ### Kingdom Level Rewards (Overall)
-- **Level 10:** 2,000 👑 GoldCoins
-- **Level 30:** 10,000 👑 GoldCoins
-- **Level 35:** 15,000 👑 GoldCoins
-- **Level 40:** 25,000 👑 GoldCoins
+- **Level 10:** 2,000 💰 WonderCoins
+- **Level 30:** 10,000 💰 WonderCoins
+- **Level 35:** 15,000 💰 WonderCoins
+- **Level 40:** 25,000 💰 WonderCoins
 - **Level 45:** Server Grandmaster title
-- **Level 50:** 👑 100,000 👑 GoldCoins - ULTIMATE KINGDOM LEGEND STATUS!
+- **Level 50:** 👑 100,000 💰 WonderCoins - ULTIMATE KINGDOM LEGEND STATUS!
 
 ### 🎭 Configurable Role Rewards
 **NEW FEATURE:** Admins can now set custom role rewards for any level!

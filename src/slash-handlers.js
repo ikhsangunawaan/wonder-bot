@@ -316,7 +316,7 @@ class SlashHandlers {
             .addFields(
                 {
                     name: `${this.design.theme.emojis.treasure} Economy Commands`,
-                    value: '`/balance` - Check GoldCoins treasury\n`/daily` - Claim royal daily reward\n`/work` - Work for the kingdom\n`/leaderboard` - View top earners',
+                    value: '`/balance` - Check WonderCoins treasury\n`/daily` - Claim royal daily reward\n`/work` - Work for the kingdom\n`/leaderboard` - View top earners',
                     inline: false
                 },
                 {

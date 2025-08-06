@@ -45,7 +45,7 @@ class WonderBot {
     setupEventHandlers() {
         this.client.once(Events.ClientReady, async () => {
             console.log(`✅ Luxury Kingdom Bot is ready! Logged in as ${this.client.user.tag}`);
-            this.client.user.setActivity('w.help | Luxury Kingdom 🏰 GoldCoins 👑', { type: 'WATCHING' });
+            this.client.user.setActivity('w.help | Luxury Kingdom 🏰 WonderCoins 💰', { type: 'WATCHING' });
             
             // Deploy slash commands
             await deployCommands();
